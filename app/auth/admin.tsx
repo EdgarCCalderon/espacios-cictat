@@ -160,8 +160,8 @@ export default function AdminAuthScreen() {
         <View style={styles.campoWrap}>
           <TextInput
             mode="outlined"
-            label="Correo institucional del Encargado *"
-            placeholder="encargado.cictat@ujat.mx"
+            label="Correo del Encargado / Administrador *"
+            placeholder="encargado@ujat.mx o tu_correo@gmail.com"
             value={correo}
             onChangeText={(v) => {
               setCorreo(v);
@@ -179,7 +179,11 @@ export default function AdminAuthScreen() {
             <HelperText type="error" visible padding="none">
               {errCorreo}
             </HelperText>
-          ) : null}
+          ) : (
+            <HelperText type="info" visible padding="none">
+              Para pruebas puedes usar tu correo personal (Gmail, Outlook, etc.).
+            </HelperText>
+          )}
         </View>
 
         <View style={styles.campoWrap}>

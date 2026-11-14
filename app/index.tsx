@@ -40,7 +40,7 @@ import {
 export default function CatalogoScreen() {
   const router = useRouter();
   const { width } = useWindowDimensions();
-  const { perfil, isAdmin, isLoading: authCargando } = useAuth();
+  const { user, perfil, isAdmin, isLoading: authCargando } = useAuth();
   const rol = perfil?.rol ?? null;
 
   const {
@@ -103,7 +103,7 @@ export default function CatalogoScreen() {
           />
         }
       >
-        {/* Barra superior: acceso a Panel de Administración (si es admin) + sesión */}
+        {/* Barra superior: acceso a Panel de Administración (si es admin) + Mis Solicitudes + sesión */}
         <View style={styles.topBar}>
           {isAdmin ? (
             <Pressable
@@ -121,6 +121,23 @@ export default function CatalogoScreen() {
                 Panel de Administración
               </Text>
               <MaterialCommunityIcons name="arrow-right" size={16} color="#FFFFFF" />
+            </Pressable>
+          ) : null}
+          {user ? (
+            <Pressable
+              onPress={() => router.push('/solicitud/mis-solicitudes')}
+              accessibilityRole="button"
+              accessibilityLabel="Mis Solicitudes de Reserva"
+              style={({ pressed }) => [
+                styles.misSolicitudesHeaderBtn,
+                getTerracottaShadow({ border: 'structural', intensity: 0.9 }),
+                pressed && styles.pressed,
+              ]}
+            >
+              <MaterialCommunityIcons name="clipboard-text-clock" size={18} color={cictatColors.carbon} />
+              <Text variant="labelLarge" style={styles.misSolicitudesHeaderBtnTexto}>
+                Mis Solicitudes
+              </Text>
             </Pressable>
           ) : null}
           <SesionButton onIniciarSesion={irASelectorDeAcceso} />
@@ -225,6 +242,21 @@ const styles = StyleSheet.create({
   },
   adminHeaderBtnTexto: {
     color: '#FFFFFF',
+    fontWeight: '800',
+  },
+  misSolicitudesHeaderBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs + 2,
+    backgroundColor: cictatColors.surfaceElevated,
+    borderColor: cictatColors.carbon,
+    borderWidth: 1.5,
+    borderRadius: radius.pill,
+    paddingVertical: spacing.sm + 1,
+    paddingHorizontal: spacing.md + 4,
+  },
+  misSolicitudesHeaderBtnTexto: {
+    color: cictatColors.carbon,
     fontWeight: '800',
   },
   pressed: { opacity: 0.8 },

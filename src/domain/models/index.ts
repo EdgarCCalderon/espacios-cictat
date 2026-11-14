@@ -167,6 +167,8 @@ export interface DocumentoSolicitud {
   tipo_documento: TipoDocumento;
   nombre_archivo: string;
   storage_path: string;
+  storage_bucket?: string | null;
+  url_descarga?: string | null;
   mime_type: string | null;
   created_at: ISODateTime;
 }

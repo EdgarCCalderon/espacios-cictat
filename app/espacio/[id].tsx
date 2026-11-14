@@ -155,7 +155,26 @@ export default function EspacioDetalleScreen() {
         iconColor={cictatColors.carbon}
         style={styles.backBtn}
       />
-      <EstadoVivoBadge estado={c.estadoVivo} detalle={c.detalleVivo} />
+      <View style={styles.topBarDerecha}>
+        {user ? (
+          <Pressable
+            onPress={() => router.push('/solicitud/mis-solicitudes')}
+            accessibilityRole="button"
+            accessibilityLabel="Mis Solicitudes"
+            style={({ pressed }) => [
+              styles.btnMisSolicitudesTop,
+              getTerracottaShadow({ border: 'structural', intensity: 0.8 }),
+              pressed && styles.pressed,
+            ]}
+          >
+            <MaterialCommunityIcons name="clipboard-text-clock" size={16} color={cictatColors.carbon} />
+            <Text variant="labelMedium" style={styles.btnMisSolicitudesTopTexto}>
+              Mis Solicitudes
+            </Text>
+          </Pressable>
+        ) : null}
+        <EstadoVivoBadge estado={c.estadoVivo} detalle={c.detalleVivo} />
+      </View>
     </View>
   );
 
@@ -442,6 +461,23 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xxl,
   },
   topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  topBarDerecha: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  btnMisSolicitudesTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    backgroundColor: cictatColors.surfaceElevated,
+    borderWidth: 1.5,
+    borderColor: cictatColors.carbon,
+    borderRadius: radius.pill,
+    paddingVertical: spacing.xs + 2,
+    paddingHorizontal: spacing.md,
+  },
+  btnMisSolicitudesTopTexto: {
+    color: cictatColors.carbon,
+    fontWeight: '700',
+  },
+  pressed: { opacity: 0.75 },
   backBtn: {
     margin: 0,
     backgroundColor: cictatColors.surfaceElevated,

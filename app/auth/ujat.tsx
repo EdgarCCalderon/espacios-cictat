@@ -246,7 +246,7 @@ export default function UjatAuthScreen() {
             </HelperText>
           ) : (
             <HelperText type="info" visible padding="none" style={styles.helperInfo}>
-              Se autocompleta tu correo institucional @{dominio} al escribir tu matrícula.
+              Se autocompleta con @{dominio}, pero puedes editarlo libremente (ej. tu Gmail) para pruebas.
             </HelperText>
           )}
         </View>
