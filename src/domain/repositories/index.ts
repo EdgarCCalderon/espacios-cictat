@@ -6,13 +6,22 @@
  * dependencias), nunca del cliente de Supabase directamente.
  */
 import type {
+  DocumentoSolicitud,
   Espacio,
+  EstadoDictamen,
+  EstadoSolicitud,
+  HistorialAuditoriaItem,
   ISODate,
+  ISODateTime,
+  ISOTime,
+  NuevoDocumentoSolicitud,
   NuevoPerfilUsuario,
   PerfilUsuario,
+  SolicitudReserva,
   SolicitudReservaCalendario,
   UUID,
 } from '../models';
+import type { SolicitudAdminSinColision } from '../usecases/panelAdmin';
 
 export interface IPerfilRepository {
   obtenerPorId(id: UUID): Promise<PerfilUsuario | null>;
@@ -56,10 +65,38 @@ export interface IAutenticacionGateway {
   cerrarSesion(): Promise<void>;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Espacios
+// ─────────────────────────────────────────────────────────────────────────────
+
 export interface IEspacioRepository {
   /** Catálogo completo de `espacios`, ordenado por `codigo_espacio` ASC. */
   listarCatalogo(): Promise<Espacio[]>;
   obtenerPorId(id: UUID): Promise<Espacio | null>;
+  /** Actualiza campos editables de un espacio (`esta_activo`, `capacidad`, `equipamiento_incluido`, `reglamento`). */
+  actualizar(espacioId: UUID, datos: Partial<Espacio>): Promise<Espacio>;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Solicitudes de reserva
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface ParametrosDictamenSolicitud {
+  solicitudId: UUID;
+  adminId: UUID;
+  nuevoEstado: EstadoDictamen;
+  motivo: string | null;
+  fechaDictamenISO: ISODateTime;
+}
+
+export interface EntradaCrearSolicitudDemo {
+  usuario_id: UUID;
+  espacio_id: UUID;
+  fecha_evento: ISODate;
+  hora_inicio: ISOTime;
+  hora_fin: ISOTime;
+  hora_fin_limpieza: ISOTime;
+  tema_evento: string;
 }
 
 export interface ISolicitudReservaRepository {
@@ -71,13 +108,52 @@ export interface ISolicitudReservaRepository {
     espacioId: UUID,
     fechaISO: ISODate,
   ): Promise<SolicitudReservaCalendario[]>;
+
+  /**
+   * Consulta administrativa completa con relaciones anidadas (`usuario`, `espacio`, `documentos`),
+   * ordenada por `fecha_evento` ASC y `hora_inicio` ASC.
+   */
+  listarParaAdmin(filtroEstado?: EstadoSolicitud): Promise<SolicitudAdminSinColision[]>;
+
+  /**
+   * Consulta administrativa en un rango de fechas (`[fechaInicioISO, fechaFinISO]`)
+   * para reportes y estadísticas.
+   */
+  listarParaReporte(
+    fechaInicioISO: ISODate,
+    fechaFinISO: ISODate,
+  ): Promise<SolicitudAdminSinColision[]>;
+
+  /**
+   * Dictamina una solicitud (`aprobada`, `rechazada` o `cancelada`).
+   * El trigger SQL `trg_after_solicitud_reserva` en Supabase se encarga de
+   * rechazar en cascada las solicitudes pendientes en colisión y registrar la bitácora.
+   */
+  dictaminar(params: ParametrosDictamenSolicitud): Promise<SolicitudReserva>;
+
+  /** Inserta una solicitud de reserva (usado por el generador de datos demo). */
+  crearDemo(datos: EntradaCrearSolicitudDemo): Promise<SolicitudReserva>;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Documentos adjuntos y Bitácora de Auditoría
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface IDocumentoSolicitudRepository {
+  crearVarios(documentos: readonly NuevoDocumentoSolicitud[]): Promise<DocumentoSolicitud[]>;
+  obtenerUrlDescarga(storagePath: string): Promise<string | null>;
+}
+
+export interface IHistorialSolicitudRepository {
+  listarReciente(limite?: number): Promise<HistorialAuditoriaItem[]>;
+  listarPorSolicitudes(solicitudIds: readonly UUID[]): Promise<HistorialAuditoriaItem[]>;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Cambios en vivo (Realtime)
 // ─────────────────────────────────────────────────────────────────────────────
 
-export type TablaEnVivo = 'espacios' | 'solicitudes_reservas';
+export type TablaEnVivo = 'espacios' | 'solicitudes_reservas' | 'historial_estados_solicitud';
 export type EventoEnVivo = 'INSERT' | 'UPDATE' | 'DELETE';
 export type EstadoEnVivo = 'conectando' | 'en_vivo' | 'error';
 

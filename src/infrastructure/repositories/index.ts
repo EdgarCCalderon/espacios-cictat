@@ -8,28 +8,38 @@ import type { User } from '@supabase/supabase-js';
 
 import { ErrorAuth } from '@/domain/errors/ErrorAuth';
 import type {
+  DocumentoSolicitud,
+  Espacio,
+  EstadoSolicitud,
+  HistorialAuditoriaItem,
+  ISODate,
+  NuevoDocumentoSolicitud,
+  NuevoPerfilUsuario,
+  PerfilUsuario,
+  SolicitudReserva,
+  SolicitudReservaCalendario,
+  UUID,
+} from '@/domain/models';
+import type {
   CambioEnVivo,
+  EntradaCrearSolicitudDemo,
   IAutenticacionGateway,
   ICambiosEnVivoGateway,
+  IDocumentoSolicitudRepository,
   IEspacioRepository,
+  IHistorialSolicitudRepository,
   IPerfilRepository,
   ISolicitudReservaRepository,
   MetadataRegistro,
   OpcionesSuscripcion,
+  ParametrosDictamenSolicitud,
   ResultadoRegistro,
   UsuarioAuth,
 } from '@/domain/repositories';
-import type {
-  Espacio,
-  ISODate,
-  NuevoPerfilUsuario,
-  PerfilUsuario,
-  SolicitudReservaCalendario,
-  UUID,
-} from '@/domain/models';
+import type { SolicitudAdminSinColision } from '@/domain/usecases/panelAdmin';
 import { supabase } from '../supabase/supabaseClient';
 import { lanzarSiError } from '../supabase/supabaseError';
-import { TABLAS } from '../supabase/tables';
+import { BUCKETS, TABLAS } from '../supabase/tables';
 
 export { RepositorioError, describirError, errorInfoDesde } from '../supabase/supabaseError';
 export type { ErrorInfo } from '../supabase/supabaseError';
@@ -189,15 +199,68 @@ export class SupabaseEspacioRepository implements IEspacioRepository {
     lanzarSiError('No se pudo consultar el espacio (espacios)', res);
     return (res.data as Espacio | null) ?? null;
   }
+
+  async actualizar(espacioId: UUID, datos: Partial<Espacio>): Promise<Espacio> {
+    const payload: Record<string, unknown> = {
+      ...datos,
+      updated_at: new Date().toISOString(),
+    };
+    delete payload.id;
+    delete payload.created_at;
+
+    const res = await supabase
+      .from(TABLAS.espacios)
+      .update(payload)
+      .eq('id', espacioId)
+      .select('*')
+      .single();
+    lanzarSiError('No se pudo actualizar el espacio (espacios)', res);
+    return res.data as Espacio;
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Solicitudes (sólo la proyección pública que necesita el calendario)
+// Solicitudes de reserva (proyección pública + operaciones administrativas)
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Columnas mínimas: sin `usuario_id` ni `tema_evento` (datos personales). */
+/** Columnas mínimas para el calendario público: sin `usuario_id` ni `tema_evento`. */
 const COLUMNAS_CALENDARIO =
   'id,espacio_id,fecha_evento,hora_inicio,hora_fin,hora_fin_limpieza,estado';
+
+/** Proyección completa administrativa con joins anidados. */
+const SELECT_ADMIN_ANIDADO =
+  '*, usuario:perfiles_usuarios!usuario_id(*), espacio:espacios!espacio_id(*), documentos:documentos_solicitud(*)';
+
+const normalizarFilaSolicitudAdmin = (raw: Record<string, unknown>): SolicitudAdminSinColision => {
+  const usuarioRaw = raw.usuario;
+  const espacioRaw = raw.espacio;
+  const docsRaw = raw.documentos;
+
+  const usuario = (Array.isArray(usuarioRaw) ? usuarioRaw[0] : usuarioRaw) as PerfilUsuario | null;
+  const espacio = (Array.isArray(espacioRaw) ? espacioRaw[0] : espacioRaw) as Espacio | null;
+  const documentos = (Array.isArray(docsRaw) ? docsRaw : []) as DocumentoSolicitud[];
+
+  return {
+    id: String(raw.id),
+    usuario_id: String(raw.usuario_id),
+    espacio_id: String(raw.espacio_id),
+    fecha_evento: String(raw.fecha_evento),
+    hora_inicio: String(raw.hora_inicio),
+    hora_fin: String(raw.hora_fin),
+    hora_fin_limpieza: raw.hora_fin_limpieza ? String(raw.hora_fin_limpieza) : null,
+    tema_evento: String(raw.tema_evento ?? ''),
+    estado: (raw.estado as EstadoSolicitud) ?? 'pendiente',
+    evaluado_por_admin_id: raw.evaluado_por_admin_id ? String(raw.evaluado_por_admin_id) : null,
+    fecha_dictamen: raw.fecha_dictamen ? String(raw.fecha_dictamen) : null,
+    motivo_rechazo_cancelacion: raw.motivo_rechazo_cancelacion
+      ? String(raw.motivo_rechazo_cancelacion)
+      : null,
+    created_at: String(raw.created_at),
+    usuario: usuario ?? null,
+    espacio: espacio ?? null,
+    documentos,
+  };
+};
 
 export class SupabaseSolicitudReservaRepository implements ISolicitudReservaRepository {
   async listarActivasPorEspacioYFecha(
@@ -213,6 +276,138 @@ export class SupabaseSolicitudReservaRepository implements ISolicitudReservaRepo
       .order('hora_inicio', { ascending: true });
     lanzarSiError('No se pudo consultar las reservas (solicitudes_reservas)', res);
     return (res.data ?? []) as SolicitudReservaCalendario[];
+  }
+
+  async listarParaAdmin(filtroEstado?: EstadoSolicitud): Promise<SolicitudAdminSinColision[]> {
+    let query = supabase
+      .from(TABLAS.solicitudesReservas)
+      .select(SELECT_ADMIN_ANIDADO)
+      .order('fecha_evento', { ascending: true })
+      .order('hora_inicio', { ascending: true });
+
+    if (filtroEstado) {
+      query = query.eq('estado', filtroEstado);
+    }
+
+    const res = await query;
+    lanzarSiError('No se pudo listar las solicitudes para administración (solicitudes_reservas)', res);
+    const filas = (res.data ?? []) as Record<string, unknown>[];
+    return filas.map(normalizarFilaSolicitudAdmin);
+  }
+
+  async listarParaReporte(
+    fechaInicioISO: ISODate,
+    fechaFinISO: ISODate,
+  ): Promise<SolicitudAdminSinColision[]> {
+    const res = await supabase
+      .from(TABLAS.solicitudesReservas)
+      .select(SELECT_ADMIN_ANIDADO)
+      .gte('fecha_evento', fechaInicioISO)
+      .lte('fecha_evento', fechaFinISO)
+      .order('fecha_evento', { ascending: true })
+      .order('hora_inicio', { ascending: true });
+
+    lanzarSiError('No se pudo consultar las solicitudes del reporte (solicitudes_reservas)', res);
+    const filas = (res.data ?? []) as Record<string, unknown>[];
+    return filas.map(normalizarFilaSolicitudAdmin);
+  }
+
+  async dictaminar(params: ParametrosDictamenSolicitud): Promise<SolicitudReserva> {
+    const res = await supabase
+      .from(TABLAS.solicitudesReservas)
+      .update({
+        estado: params.nuevoEstado,
+        evaluado_por_admin_id: params.adminId,
+        fecha_dictamen: params.fechaDictamenISO,
+        motivo_rechazo_cancelacion: params.motivo,
+      })
+      .eq('id', params.solicitudId)
+      .select('*')
+      .single();
+
+    lanzarSiError('No se pudo dictaminar la solicitud (solicitudes_reservas)', res);
+    return res.data as SolicitudReserva;
+  }
+
+  async crearDemo(datos: EntradaCrearSolicitudDemo): Promise<SolicitudReserva> {
+    const res = await supabase
+      .from(TABLAS.solicitudesReservas)
+      .insert({
+        usuario_id: datos.usuario_id,
+        espacio_id: datos.espacio_id,
+        fecha_evento: datos.fecha_evento,
+        hora_inicio: datos.hora_inicio,
+        hora_fin: datos.hora_fin,
+        hora_fin_limpieza: datos.hora_fin_limpieza,
+        tema_evento: datos.tema_evento,
+        estado: 'pendiente',
+      })
+      .select('*')
+      .single();
+
+    lanzarSiError('No se pudo insertar la solicitud demo (solicitudes_reservas)', res);
+    return res.data as SolicitudReserva;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Documentos de Solicitud
+// ─────────────────────────────────────────────────────────────────────────────
+
+export class SupabaseDocumentoSolicitudRepository implements IDocumentoSolicitudRepository {
+  async crearVarios(documentos: readonly NuevoDocumentoSolicitud[]): Promise<DocumentoSolicitud[]> {
+    if (documentos.length === 0) return [];
+    const res = await supabase
+      .from(TABLAS.documentosSolicitud)
+      .insert([...documentos])
+      .select('*');
+    lanzarSiError('No se pudieron adjuntar los documentos de la solicitud (documentos_solicitud)', res);
+    return (res.data ?? []) as DocumentoSolicitud[];
+  }
+
+  async obtenerUrlDescarga(storagePath: string): Promise<string | null> {
+    const limpio = storagePath.trim();
+    if (!limpio) return null;
+    if (/^https?:\/\//i.test(limpio)) return limpio;
+
+    const { data, error } = await supabase.storage
+      .from(BUCKETS.documentosSolicitud)
+      .createSignedUrl(limpio, 3600);
+
+    if (!error && data?.signedUrl) return data.signedUrl;
+
+    const pub = supabase.storage.from(BUCKETS.documentosSolicitud).getPublicUrl(limpio);
+    return pub.data.publicUrl || null;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Historial de Estados de Solicitud (Bitácora de Auditoría)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const SELECT_HISTORIAL =
+  '*, solicitud:solicitudes_reservas(id,fecha_evento,hora_inicio,hora_fin,tema_evento,espacio_id), usuario:perfiles_usuarios!cambiado_por_usuario_id(id,nombre_completo,correo,rol)';
+
+export class SupabaseHistorialSolicitudRepository implements IHistorialSolicitudRepository {
+  async listarReciente(limite = 50): Promise<HistorialAuditoriaItem[]> {
+    const res = await supabase
+      .from(TABLAS.historialEstadosSolicitud)
+      .select(SELECT_HISTORIAL)
+      .order('fecha_cambio', { ascending: false })
+      .limit(limite);
+    lanzarSiError('No se pudo consultar la bitácora de auditoría (historial_estados_solicitud)', res);
+    return (res.data ?? []) as HistorialAuditoriaItem[];
+  }
+
+  async listarPorSolicitudes(solicitudIds: readonly UUID[]): Promise<HistorialAuditoriaItem[]> {
+    if (solicitudIds.length === 0) return [];
+    const res = await supabase
+      .from(TABLAS.historialEstadosSolicitud)
+      .select(SELECT_HISTORIAL)
+      .in('solicitud_id', [...solicitudIds])
+      .order('fecha_cambio', { ascending: false });
+    lanzarSiError('No se pudo consultar el historial de las solicitudes (historial_estados_solicitud)', res);
+    return (res.data ?? []) as HistorialAuditoriaItem[];
   }
 }
 
@@ -272,5 +467,7 @@ export const repositorios = {
   autenticacion: new SupabaseAutenticacionGateway(),
   espacios: new SupabaseEspacioRepository(),
   solicitudes: new SupabaseSolicitudReservaRepository(),
+  documentos: new SupabaseDocumentoSolicitudRepository(),
+  historial: new SupabaseHistorialSolicitudRepository(),
   cambiosEnVivo: new SupabaseCambiosEnVivoGateway(),
 } as const;

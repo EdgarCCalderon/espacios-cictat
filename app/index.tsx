@@ -5,9 +5,17 @@
  * de acceso del dominio. Los Cubículos 7-9 son visibles para todos pero sólo
  * accesibles para Alumnos de Posgrado / Administradores.
  */
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useRouter } from 'expo-router';
 import React, { useCallback, useState } from 'react';
-import { RefreshControl, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import {
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -22,12 +30,17 @@ import { EspacioCard } from '@/presentation/components/catalogo/EspacioCard';
 import { SesionButton } from '@/presentation/components/catalogo/SesionButton';
 import { useAuth } from '@/presentation/context/AuthContext';
 import { useCatalogoController } from '@/presentation/controllers/useCatalogoController';
-import { cictatColors, spacing } from '@/presentation/theme/cictatTheme';
+import {
+  cictatColors,
+  getTerracottaShadow,
+  radius,
+  spacing,
+} from '@/presentation/theme/cictatTheme';
 
 export default function CatalogoScreen() {
   const router = useRouter();
   const { width } = useWindowDimensions();
-  const { perfil, isLoading: authCargando } = useAuth();
+  const { perfil, isAdmin, isLoading: authCargando } = useAuth();
   const rol = perfil?.rol ?? null;
 
   const {
@@ -90,8 +103,26 @@ export default function CatalogoScreen() {
           />
         }
       >
-        {/* Barra superior: sesión */}
+        {/* Barra superior: acceso a Panel de Administración (si es admin) + sesión */}
         <View style={styles.topBar}>
+          {isAdmin ? (
+            <Pressable
+              onPress={() => router.push('/admin')}
+              accessibilityRole="button"
+              accessibilityLabel="Abrir Panel de Administración"
+              style={({ pressed }) => [
+                styles.adminHeaderBtn,
+                getTerracottaShadow({ border: 'structural', intensity: 1.1 }),
+                pressed && styles.pressed,
+              ]}
+            >
+              <MaterialCommunityIcons name="shield-crown" size={18} color="#FFFFFF" />
+              <Text variant="labelLarge" style={styles.adminHeaderBtnTexto}>
+                Panel de Administración
+              </Text>
+              <MaterialCommunityIcons name="arrow-right" size={16} color="#FFFFFF" />
+            </Pressable>
+          ) : null}
           <SesionButton onIniciarSesion={irASelectorDeAcceso} />
         </View>
 
@@ -174,7 +205,29 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     paddingBottom: spacing.xxxl,
   },
-  topBar: { flexDirection: 'row', justifyContent: 'flex-end' },
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    flexWrap: 'wrap',
+    gap: spacing.sm + 2,
+  },
+  adminHeaderBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs + 2,
+    backgroundColor: cictatColors.terracotta,
+    borderColor: cictatColors.carbon,
+    borderWidth: 1.5,
+    borderRadius: radius.pill,
+    paddingVertical: spacing.sm + 1,
+    paddingHorizontal: spacing.md + 4,
+  },
+  adminHeaderBtnTexto: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+  },
+  pressed: { opacity: 0.8 },
   header: { gap: spacing.md },
   subtitulo: { color: cictatColors.textSecondary },
   filaEstado: {

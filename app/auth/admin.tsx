@@ -35,9 +35,9 @@ export default function AdminAuthScreen() {
     fecha?: string;
   }>();
 
-  const returnTo = normalizarParametro(rawParams.returnTo);
   const espacioId = normalizarParametro(rawParams.espacioId);
   const fecha = normalizarParametro(rawParams.fecha);
+  const returnTo = normalizarParametro(rawParams.returnTo) ?? (espacioId ? undefined : '/admin');
 
   const {
     cargando,

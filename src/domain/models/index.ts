@@ -141,6 +141,12 @@ export interface SolicitudReserva {
   hora_fin_limpieza: ISOTime | null;
   tema_evento: string;
   estado: EstadoSolicitud;
+  /** FK → perfiles_usuarios.id (administrador que dictaminó). */
+  evaluado_por_admin_id: UUID | null;
+  /** timestamptz del dictamen administrativo. */
+  fecha_dictamen: ISODateTime | null;
+  /** Motivo de rechazo (manual o automático por colisión) o cancelación. */
+  motivo_rechazo_cancelacion: string | null;
   created_at: ISODateTime;
 }
 
@@ -153,17 +159,19 @@ export type SolicitudReservaCalendario = Pick<
   'id' | 'espacio_id' | 'fecha_evento' | 'hora_inicio' | 'hora_fin' | 'hora_fin_limpieza' | 'estado'
 >;
 
-/** Tabla `documentos_solicitud` — archivos adjuntos (columnas confirmadas). */
+/** Tabla `documentos_solicitud` — archivos adjuntos (columnas confirmadas en Supabase). */
 export interface DocumentoSolicitud {
   id: UUID;
   /** FK → solicitudes_reservas.id */
   solicitud_id: UUID;
   tipo_documento: TipoDocumento;
   nombre_archivo: string;
+  storage_path: string;
+  mime_type: string | null;
   created_at: ISODateTime;
 }
 
-/** Tabla `historial_estados_solicitud` — bitácora de auditoría. */
+/** Tabla `historial_estados_solicitud` — bitácora de auditoría en Supabase. */
 export interface HistorialEstadoSolicitud {
   id: UUID;
   /** FK → solicitudes_reservas.id */
@@ -172,9 +180,10 @@ export interface HistorialEstadoSolicitud {
   estado_anterior: EstadoSolicitud | null;
   estado_nuevo: EstadoSolicitud;
   /** FK → perfiles_usuarios.id */
-  cambiado_por: UUID | null;
-  comentario: string | null;
-  created_at: ISODateTime;
+  cambiado_por_usuario_id: UUID | null;
+  motivo_cambio: string | null;
+  es_rechazo_automatico_colision: boolean;
+  fecha_cambio: ISODateTime;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -188,7 +197,13 @@ export type ActualizarEspacio = Partial<NuevoEspacio>;
 
 export type NuevaSolicitudReserva = Omit<
   SolicitudReserva,
-  'id' | 'created_at' | 'estado' | 'hora_fin_limpieza'
+  | 'id'
+  | 'created_at'
+  | 'estado'
+  | 'hora_fin_limpieza'
+  | 'evaluado_por_admin_id'
+  | 'fecha_dictamen'
+  | 'motivo_rechazo_cancelacion'
 >;
 
 export type ActualizarPerfilUsuario = Partial<Omit<PerfilUsuario, 'id' | 'created_at' | 'rol' | 'correo'>>;
@@ -196,7 +211,7 @@ export type ActualizarPerfilUsuario = Partial<Omit<PerfilUsuario, 'id' | 'create
 export type NuevoDocumentoSolicitud = Omit<DocumentoSolicitud, 'id' | 'created_at'>;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Agregados de lectura (joins frecuentes)
+// Agregados de lectura y DTOs Administrativos (Fase 6)
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface SolicitudReservaDetalle extends SolicitudReserva {
@@ -204,3 +219,69 @@ export interface SolicitudReservaDetalle extends SolicitudReserva {
   solicitante: Pick<PerfilUsuario, 'id' | 'nombre_completo' | 'correo' | 'rol'>;
   documentos: DocumentoSolicitud[];
 }
+
+export type EstadoDictamen = Extract<EstadoSolicitud, 'aprobada' | 'rechazada' | 'cancelada'>;
+
+/** Solicitud enriquecida para la bandeja administrativa (con colisión calculada en memoria). */
+export interface SolicitudAdminItem extends SolicitudReserva {
+  usuario: PerfilUsuario | null;
+  espacio: Espacio | null;
+  documentos: DocumentoSolicitud[];
+  /** `true` si está `pendiente` y su bloque `[hora_inicio, hora_fin_limpieza]` se traslapa con otra `pendiente` del mismo espacio y fecha. */
+  tieneColisionPendiente: boolean;
+  /** IDs de las otras solicitudes `pendiente` con las que tiene traslape horario. */
+  colisionaConIds: UUID[];
+}
+
+export interface KpisReporteOcupacion {
+  totalSolicitudes: number;
+  aprobadas: number;
+  rechazadasManual: number;
+  rechazadasPorColisionAutomatica: number;
+  canceladas: number;
+  pendientes: number;
+}
+
+export interface UsoEspacioItem {
+  espacioId: UUID;
+  codigoEspacio: string;
+  nombreEspacio: string;
+  tipoEspacio: TipoEspacio;
+  capacidad: number;
+  estaActivo: boolean;
+  horasAprobadasOcupadas: number;
+  numeroReservasAprobadas: number;
+  totalSolicitudesEspacio: number;
+  /** Porcentaje relativo (0 a 100) respecto al máximo de horas ocupadas para barras de progreso. */
+  porcentajeRelativo: number;
+}
+
+export type RolSolicitanteReporte = Extract<
+  RolUsuario,
+  'estudiante_posgrado' | 'doctor_posgrado' | 'publico_general'
+>;
+
+export interface DistribucionRolItem {
+  rol: RolSolicitanteReporte;
+  etiqueta: string;
+  conteo: number;
+  porcentaje: number;
+}
+
+export interface HistorialAuditoriaItem extends HistorialEstadoSolicitud {
+  solicitud?: Pick<
+    SolicitudReserva,
+    'id' | 'fecha_evento' | 'hora_inicio' | 'hora_fin' | 'tema_evento' | 'espacio_id'
+  > | null;
+  usuario?: Pick<PerfilUsuario, 'id' | 'nombre_completo' | 'correo' | 'rol'> | null;
+}
+
+export interface ReporteOcupacionDTO {
+  fechaInicioISO: ISODate;
+  fechaFinISO: ISODate;
+  kpis: KpisReporteOcupacion;
+  rankingEspacios: UsoEspacioItem[];
+  distribucionPorRol: DistribucionRolItem[];
+  bitacoraReciente: HistorialAuditoriaItem[];
+}
+
