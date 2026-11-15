@@ -119,8 +119,6 @@ export default function PanelAdminScreen() {
             onChangeFiltro={ctrl.setFiltroEstado}
             conteos={ctrl.conteos}
             procesandoId={ctrl.procesandoId}
-            generandoDemo={ctrl.generandoDemo}
-            onGenerarDemo={ctrl.generarDatosDemo}
             onDictaminar={ctrl.dictaminarSolicitud}
             onObtenerUrlDocumento={ctrl.obtenerUrlDocumento}
           />
@@ -261,7 +259,7 @@ export default function PanelAdminScreen() {
                 icon="logout"
                 onPress={() => void manejarCerrarSesion()}
                 buttonColor={cictatColors.carbon}
-                textColor="#FFFFFF"
+                textColor="#ffffff"
                 style={styles.btnSalirSidebar}
                 labelStyle={styles.bold}
               >
@@ -311,7 +309,7 @@ export default function PanelAdminScreen() {
                 <IconButton
                   icon="logout"
                   size={20}
-                  iconColor="#FFFFFF"
+                  iconColor="#e81313"
                   containerColor={cictatColors.carbon}
                   onPress={() => void manejarCerrarSesion()}
                   accessibilityLabel="Cerrar sesión"

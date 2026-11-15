@@ -12,9 +12,10 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  TouchableOpacity,
   View,
 } from 'react-native';
-import { Button, IconButton, Text } from 'react-native-paper';
+import { Button, Text } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { ErrorAuthInfo } from '@/domain/errors/ErrorAuth';
@@ -64,10 +65,10 @@ export const AuthScreenContainer: React.FC<AuthScreenContainerProps> = ({
               accessibilityLabel={etiquetaVolver}
               style={({ pressed }) => [styles.backPill, pressed && styles.pressed]}
             >
-              <IconButton
-                icon="arrow-left"
+              <MaterialCommunityIcons
+                name="arrow-left"
                 size={18}
-                iconColor={cictatColors.carbon}
+                color={cictatColors.carbon}
                 style={styles.backIcon}
               />
               <Text variant="labelLarge" style={styles.backText}>
@@ -224,11 +225,12 @@ const styles = StyleSheet.create({
     borderColor: cictatColors.carbon,
     borderWidth: 1.5,
     borderRadius: radius.pill,
-    paddingRight: spacing.md,
-    paddingVertical: 2,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    gap: spacing.xs,
   },
   pressed: { opacity: 0.78 },
-  backIcon: { margin: 0, width: 30, height: 30 },
+  backIcon: { margin: 0 },
   backText: { color: cictatColors.carbon, fontWeight: '800' },
   institucionalTag: {
     flexDirection: 'row',

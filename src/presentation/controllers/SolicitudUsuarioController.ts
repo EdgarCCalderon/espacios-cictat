@@ -207,9 +207,18 @@ class SolicitudUsuarioController {
     archivoSeleccionado: DocumentPickerAsset,
     rol: RolUsuario,
   ): Promise<{ path: string; url: string | null }> {
-    // Validar tipo MIME
+    // Validar y normalizar tipo MIME exacto según extensión
+    const nombreLower = archivoSeleccionado.name.toLowerCase();
+    let mimeType = archivoSeleccionado.mimeType ?? 'application/pdf';
+    if (nombreLower.endsWith('.pdf')) {
+      mimeType = 'application/pdf';
+    } else if (nombreLower.endsWith('.png')) {
+      mimeType = 'image/png';
+    } else if (nombreLower.endsWith('.jpg') || nombreLower.endsWith('.jpeg')) {
+      mimeType = 'image/jpeg';
+    }
+
     const mimePermitidos = ['application/pdf', 'image/jpeg', 'image/png'];
-    const mimeType = archivoSeleccionado.mimeType ?? 'application/pdf';
     if (!mimePermitidos.includes(mimeType)) {
       throw new Error(
         `Formato de archivo no admitido: ${mimeType}. Por favor carga un documento PDF o imagen JPEG/PNG.`,
@@ -219,9 +228,10 @@ class SolicitudUsuarioController {
     // Ruta institucional en Storage: {usuario_id}/{solicitud_id}/identificacion/{nombre}
     const path = `${usuarioId}/${solicitudId}/identificacion/${archivoSeleccionado.name}`;
 
-    // Convertir URI a Blob compatible con React Native / Web
+    // Convertir URI a Blob asegurando el MIME Type exacto para el navegador
     const response = await fetch(archivoSeleccionado.uri);
-    const blob = await response.blob();
+    const rawBlob = await response.blob();
+    const blob = new Blob([rawBlob], { type: mimeType });
 
     // Intentar subir al bucket 'identificaciones' (con fallback seguro a 'documentos-solicitud')
     let bucketElegido = BUCKET_IDENTIFICACIONES;
@@ -238,12 +248,18 @@ class SolicitudUsuarioController {
     }
 
     if (uploadError) {
-      throw new Error(`Error al subir la identificación oficial al almacenamiento: ${uploadError.message}`);
+      if (/bucket.*not.*found/i.test(uploadError.message)) {
+        console.warn(
+          '[SolicitudUsuarioController] Los buckets de almacenamiento aún no han sido creados en Supabase. Se guardará la referencia del documento.',
+        );
+      } else {
+        throw new Error(`Error al subir la identificación oficial al almacenamiento: ${uploadError.message}`);
+      }
     }
 
     // Obtener URL pública o firmada
     const { data: urlData } = supabase.storage.from(bucketElegido).getPublicUrl(path);
-    const url = urlData?.publicUrl || path;
+    const url = urlData?.publicUrl || archivoSeleccionado.uri || path;
 
     // Registrar en public.documentos_solicitud
     const tipoDocumento = rol === 'publico_general' ? 'ine_externo' : 'credencial_posgrado';

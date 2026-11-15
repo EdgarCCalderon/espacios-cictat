@@ -10,7 +10,7 @@
  */
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import React, { useState } from 'react';
-import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Linking, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import {
   Button,
   Dialog,
@@ -34,6 +34,7 @@ import {
   formatearFolioCorto,
   formatearHoraLimpieza,
 } from '@/domain/usecases';
+import { generadorFormatoPDFService } from '@/application/services/GeneradorFormatoPDFService';
 import type {
   ConteosBandejaAdmin,
   FiltroEstadoBandeja,
@@ -51,8 +52,6 @@ export interface BandejaSolicitudesViewProps {
   onChangeFiltro: (filtro: FiltroEstadoBandeja) => void;
   conteos: ConteosBandejaAdmin;
   procesandoId: string | null;
-  generandoDemo: boolean;
-  onGenerarDemo: () => Promise<boolean>;
   onDictaminar: (
     solicitudId: UUID,
     nuevoEstado: EstadoDictamen,
@@ -81,8 +80,6 @@ export const BandejaSolicitudesView: React.FC<BandejaSolicitudesViewProps> = ({
   onChangeFiltro,
   conteos,
   procesandoId,
-  generandoDemo,
-  onGenerarDemo,
   onDictaminar,
   onObtenerUrlDocumento,
 }) => {
@@ -94,7 +91,7 @@ export const BandejaSolicitudesView: React.FC<BandejaSolicitudesViewProps> = ({
   const [motivoTexto, setMotivoTexto] = useState('');
   const [errorMotivo, setErrorMotivo] = useState<string | null>(null);
 
-  // Modal de detalle de documento (para archivos demo o visualización rápida)
+  // Modal de detalle de documento (para visualización de datos)
   const [docActivo, setDocActivo] = useState<DocumentoSolicitud | null>(null);
 
   const abrirModalMotivo = (
@@ -120,50 +117,85 @@ export const BandejaSolicitudesView: React.FC<BandejaSolicitudesViewProps> = ({
     }
   };
 
-  const manejarVerDocumento = async (doc: DocumentoSolicitud) => {
-    if (doc.storage_path.startsWith('demo/')) {
-      setDocActivo(doc);
-      return;
-    }
-    const url = await onObtenerUrlDocumento(doc.storage_path);
-    if (url) {
+  const manejarVerDocumento = async (
+    doc: DocumentoSolicitud,
+    solicitud: SolicitudAdminItem,
+  ) => {
+    // 1. Si es el formato PDF oficial pre-llenado, se regenera en vivo para visualizarlo o imprimirlo
+    if (doc.tipo_documento === 'formato_pdf_prellenado' && solicitud.espacio && solicitud.usuario) {
       try {
-        await Linking.openURL(url);
+        await generadorFormatoPDFService.regenerarYDescargarPDF(
+          solicitud.usuario,
+          solicitud.espacio,
+          solicitud,
+        );
         return;
-      } catch {
-        // Si no puede abrirse externamente, mostramos la ficha del documento.
+      } catch (err) {
+        console.warn('No se pudo regenerar el formato PDF:', err);
       }
     }
+
+    // 2. Si es la Identificación (Credencial / INE) o documento adjunto:
+    let urlFinal: string | null = null;
+    if (doc.url_descarga && /^https?:\/\//i.test(doc.url_descarga)) {
+      urlFinal = doc.url_descarga;
+    } else if (doc.storage_path && !doc.storage_path.startsWith('demo/')) {
+      urlFinal = await onObtenerUrlDocumento(doc.storage_path);
+    }
+
+    if (urlFinal) {
+      // En Web: obtenemos el binario con fetch y forzamos el MIME Type correcto
+      // para evitar que el navegador lo muestre como texto plano (%PDF-1.3...)
+      if (Platform.OS === 'web' && typeof window !== 'undefined') {
+        try {
+          const res = await fetch(urlFinal);
+          if (res.ok) {
+            const buffer = await res.arrayBuffer();
+            const nombreLower = (doc.nombre_archivo || '').toLowerCase();
+            let tipoMime = 'application/pdf';
+            if (nombreLower.endsWith('.png')) {
+              tipoMime = 'image/png';
+            } else if (nombreLower.endsWith('.jpg') || nombreLower.endsWith('.jpeg')) {
+              tipoMime = 'image/jpeg';
+            }
+
+            const cleanBlob = new Blob([buffer], { type: tipoMime });
+            const blobUrl = URL.createObjectURL(cleanBlob);
+            window.open(blobUrl, '_blank');
+            return;
+          }
+        } catch (fetchErr) {
+          console.warn('Error al abrir documento con MIME limpio:', fetchErr);
+        }
+
+        window.open(urlFinal, '_blank');
+        return;
+      }
+
+      // En Móvil (iOS / Android)
+      try {
+        await Linking.openURL(urlFinal);
+        return;
+      } catch {
+        // Fallback a modal
+      }
+    }
+
     setDocActivo(doc);
   };
 
   return (
     <View style={styles.contenedor}>
-      {/* Cabecera de acciones + Botón Demo */}
+      {/* Cabecera institucional de solicitudes */}
       <View style={[styles.barraAcciones, getTerracottaShadow({ border: 'structural' })]}>
         <View style={styles.barraTextos}>
           <Text variant="titleMedium" style={styles.barraTitulo}>
-            Evaluación y Dictamen de Solicitudes
+            Solicitudes de Reserva
           </Text>
           <Text variant="bodySmall" style={styles.barraSubtitulo}>
-            Al aprobar una solicitud, se bloquea automáticamente +1 hora adicional de limpieza y se
-            rechazan en cascada las solicitudes pendientes en colisión.
+            Revisa y gestiona las solicitudes de salas y cubículos. Al aprobar una reserva se asigna automáticamente una hora de limpieza posterior para el espacio.
           </Text>
         </View>
-
-        <Button
-          mode="contained"
-          icon="lightning-bolt"
-          loading={generandoDemo}
-          disabled={generandoDemo || !!procesandoId}
-          onPress={() => void onGenerarDemo()}
-          buttonColor={cictatColors.ochre}
-          textColor={cictatColors.carbon}
-          style={styles.botonDemo}
-          labelStyle={styles.botonDemoLabel}
-        >
-          ⚡ Generar Solicitudes Demo (Probar Colisión)
-        </Button>
       </View>
 
       {/* Banner de alerta si existen colisiones pendientes */}
@@ -226,8 +258,7 @@ export const BandejaSolicitudesView: React.FC<BandejaSolicitudesViewProps> = ({
             No hay solicitudes en este filtro
           </Text>
           <Text variant="bodyMedium" style={styles.vacioSubtitulo}>
-            Puedes usar el botón «⚡ Generar Solicitudes Demo (Probar Colisión)» arriba para crear 3
-            solicitudes de prueba y validar el flujo de aprobación y colisión en cascada.
+            Las nuevas solicitudes de reserva que envíen los solicitantes aparecerán aquí para su revisión.
           </Text>
         </View>
       ) : (
@@ -394,7 +425,7 @@ export const BandejaSolicitudesView: React.FC<BandejaSolicitudesViewProps> = ({
                       {sol.documentos.map((doc) => (
                         <Pressable
                           key={doc.id}
-                          onPress={() => void manejarVerDocumento(doc)}
+                          onPress={() => void manejarVerDocumento(doc, sol)}
                           accessibilityRole="button"
                           style={({ pressed }) => [
                             styles.docChip,
@@ -462,7 +493,7 @@ export const BandejaSolicitudesView: React.FC<BandejaSolicitudesViewProps> = ({
                       mode="contained"
                       icon="check-bold"
                       loading={procesandoEsta}
-                      disabled={!!procesandoId || generandoDemo}
+                      disabled={!!procesandoId}
                       onPress={() => void onDictaminar(sol.id, 'aprobada')}
                       buttonColor={cictatColors.success}
                       textColor="#FFFFFF"
@@ -475,7 +506,7 @@ export const BandejaSolicitudesView: React.FC<BandejaSolicitudesViewProps> = ({
                     <Button
                       mode="outlined"
                       icon="close-thick"
-                      disabled={!!procesandoId || generandoDemo}
+                      disabled={!!procesandoId}
                       onPress={() => abrirModalMotivo(sol, 'rechazada')}
                       textColor={cictatColors.danger}
                       style={styles.btnRechazar}
@@ -489,7 +520,7 @@ export const BandejaSolicitudesView: React.FC<BandejaSolicitudesViewProps> = ({
                     <Button
                       mode="outlined"
                       icon="calendar-remove"
-                      disabled={!!procesandoId || generandoDemo}
+                      disabled={!!procesandoId}
                       onPress={() => abrirModalMotivo(sol, 'cancelada')}
                       textColor={cictatColors.carbon}
                       style={styles.btnCancelar}

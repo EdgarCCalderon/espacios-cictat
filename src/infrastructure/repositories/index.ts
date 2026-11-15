@@ -370,14 +370,18 @@ export class SupabaseDocumentoSolicitudRepository implements IDocumentoSolicitud
     if (!limpio) return null;
     if (/^https?:\/\//i.test(limpio)) return limpio;
 
-    const { data, error } = await supabase.storage
-      .from(BUCKETS.documentosSolicitud)
-      .createSignedUrl(limpio, 3600);
+    const buckets = limpio.includes('/identificacion/')
+      ? ['identificaciones', BUCKETS.documentosSolicitud, 'formatos_pdf']
+      : ['formatos_pdf', BUCKETS.documentosSolicitud, 'identificaciones'];
 
-    if (!error && data?.signedUrl) return data.signedUrl;
+    for (const b of buckets) {
+      const { data, error } = await supabase.storage.from(b).createSignedUrl(limpio, 3600);
+      if (!error && data?.signedUrl) return data.signedUrl;
+      const pub = supabase.storage.from(b).getPublicUrl(limpio);
+      if (pub.data?.publicUrl) return pub.data.publicUrl;
+    }
 
-    const pub = supabase.storage.from(BUCKETS.documentosSolicitud).getPublicUrl(limpio);
-    return pub.data.publicUrl || null;
+    return null;
   }
 }
 

@@ -269,9 +269,32 @@ export function generarHTMLFormatoCICTAT(
       border-top: 1px dashed #D6CFBF;
       padding-top: 6px;
     }
+    @media print {
+      .barra-acciones-impresion {
+        display: none !important;
+      }
+      body {
+        padding: 0 !important;
+      }
+    }
   </style>
 </head>
 <body>
+
+  <!-- Barra de Acciones para Visualización Web (Oculta al Imprimir) -->
+  <div class="barra-acciones-impresion" style="position: sticky; top: 0; background: #1C1917; color: #FAF7F2; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-radius: 8px; margin-bottom: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.18); font-family: sans-serif; z-index: 9999;">
+    <div style="font-size: 14px; font-weight: bold; display: flex; align-items: center; gap: 8px;">
+      <span>📄</span> Formato Oficial de Solicitud de Reserva CICTAT · DACyTI UJAT
+    </div>
+    <div style="display: flex; gap: 10px;">
+      <button onclick="window.print()" style="background: #E05A2B; color: #FFFFFF; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 6px;">
+        <span>🖨️</span> Imprimir / Guardar como PDF
+      </button>
+      <button onclick="window.close()" style="background: #44403C; color: #FFFFFF; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px;">
+        Cerrar
+      </button>
+    </div>
+  </div>
 
   <!-- Encabezado Institucional -->
   <div class="header-institucional">
@@ -504,13 +527,22 @@ export async function descargarOCompartirPDF(
   htmlRespaldo?: string,
 ): Promise<void> {
   if (Platform.OS === 'web') {
-    if (htmlRespaldo) {
-      await Print.printAsync({ html: htmlRespaldo });
-      return;
-    }
-    // Si tenemos una URL/Blob
     if (typeof window !== 'undefined') {
-      window.open(uriOrHtml, '_blank');
+      const contenidoHtml = htmlRespaldo || (uriOrHtml.includes('<html') ? uriOrHtml : null);
+      if (contenidoHtml) {
+        const ventana = window.open('', '_blank');
+        if (ventana) {
+          ventana.document.open();
+          ventana.document.write(contenidoHtml);
+          ventana.document.close();
+          ventana.focus();
+          return;
+        }
+      }
+      // Si tenemos una URL/Blob
+      if (uriOrHtml) {
+        window.open(uriOrHtml, '_blank');
+      }
     }
     return;
   }
@@ -543,7 +575,16 @@ export async function regenerarYDescargarPDF(
 ): Promise<void> {
   const html = generarHTMLFormatoCICTAT(usuario, espacio, solicitud);
   if (Platform.OS === 'web') {
-    await Print.printAsync({ html });
+    if (typeof window !== 'undefined') {
+      const ventana = window.open('', '_blank');
+      if (ventana) {
+        ventana.document.open();
+        ventana.document.write(html);
+        ventana.document.close();
+        ventana.focus();
+        return;
+      }
+    }
     return;
   }
 
