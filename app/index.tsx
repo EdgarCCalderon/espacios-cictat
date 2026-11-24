@@ -103,8 +103,24 @@ export default function CatalogoScreen() {
           />
         }
       >
-        {/* Barra superior: acceso a Panel de Administración (si es admin) + Mis Solicitudes + sesión */}
+        {/* Barra superior: acceso a Panel de Administración (si es admin) + Mis Solicitudes + Guía de Uso + sesión */}
         <View style={styles.topBar}>
+          <Pressable
+            onPress={() => router.push('/guia')}
+            accessibilityRole="button"
+            accessibilityLabel="Ver Guía de Uso de Espacios CICTAT"
+            style={({ pressed }) => [
+              styles.guiaHeaderBtn,
+              getTerracottaShadow({ border: 'structural', intensity: 0.8 }),
+              pressed && styles.pressed,
+            ]}
+          >
+            <MaterialCommunityIcons name="book-open-page-variant" size={17} color={cictatColors.verde1} />
+            <Text variant="labelLarge" style={styles.guiaHeaderBtnTexto}>
+              Guía de Uso de Espacios CICTAT
+            </Text>
+          </Pressable>
+
           {isAdmin ? (
             <Pressable
               onPress={() => router.push('/admin')}
@@ -147,9 +163,46 @@ export default function CatalogoScreen() {
         <View style={styles.header}>
           <BrushTitle text="Espacios CICTAT" highlight="CICTAT" size={width >= 600 ? 'xl' : 'lg'} />
           <Text variant="bodyLarge" style={styles.subtitulo}>
-            Reserva de salas y cubículos de posgrado · DACyTI — UJAT
+            Reserva de salas y cubículos de posgrado · CICTAT — UJAT
           </Text>
         </View>
+
+        {/* Apartado interactivo: Banner de Guía de Uso */}
+        <Pressable
+          onPress={() => router.push('/guia')}
+          accessibilityRole="button"
+          accessibilityLabel="Abrir Guía de Uso de Espacios CICTAT"
+          style={({ pressed }) => [
+            styles.guiaBanner,
+            getTerracottaShadow({ border: 'structural', intensity: 0.85 }),
+            pressed && styles.pressed,
+          ]}
+        >
+          <View style={styles.guiaBannerIcono}>
+            <MaterialCommunityIcons name="school" size={26} color={cictatColors.verde1} />
+          </View>
+          <View style={styles.guiaBannerTextos}>
+            <View style={styles.guiaBannerFilaTitulo}>
+              <Text variant="titleSmall" style={styles.guiaBannerTitulo}>
+                ¿Primera vez usando Espacios CICTAT?
+              </Text>
+              <View style={styles.guiaPill}>
+                <Text variant="labelSmall" style={styles.guiaPillTexto}>
+                  GUÍA DE USO DE ESPACIOS CICTAT
+                </Text>
+              </View>
+            </View>
+            <Text variant="bodySmall" style={styles.guiaBannerDesc}>
+              Conoce los tipos de acceso, el paso a paso para reservar y las normas clave (24h de anticipación y hora de limpieza).
+            </Text>
+          </View>
+          <View style={styles.guiaBannerAccion}>
+            <Text variant="labelMedium" style={styles.guiaBannerAccionTexto}>
+              Ver Guía
+            </Text>
+            <MaterialCommunityIcons name="arrow-right" size={16} color={cictatColors.verde1} />
+          </View>
+        </Pressable>
 
         {/* Filtros */}
         <CatalogoFiltros filtro={filtro} onChange={setFiltro} conteos={conteos} />
@@ -229,11 +282,26 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: spacing.sm + 2,
   },
+  guiaHeaderBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs + 2,
+    backgroundColor: cictatColors.verde1Soft,
+    borderColor: cictatColors.carbon,
+    borderWidth: 1.5,
+    borderRadius: radius.pill,
+    paddingVertical: spacing.sm + 1,
+    paddingHorizontal: spacing.md + 4,
+  },
+  guiaHeaderBtnTexto: {
+    color: cictatColors.carbon,
+    fontWeight: '800',
+  },
   adminHeaderBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs + 2,
-    backgroundColor: cictatColors.terracotta,
+    backgroundColor: cictatColors.verde1,
     borderColor: cictatColors.carbon,
     borderWidth: 1.5,
     borderRadius: radius.pill,
@@ -262,6 +330,65 @@ const styles = StyleSheet.create({
   pressed: { opacity: 0.8 },
   header: { gap: spacing.md },
   subtitulo: { color: cictatColors.textSecondary },
+
+  guiaBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: cictatColors.surfaceElevated,
+    borderRadius: radius.lg,
+    padding: spacing.md + 2,
+    gap: spacing.md,
+  },
+  guiaBannerIcono: {
+    width: 44,
+    height: 44,
+    borderRadius: radius.pill,
+    backgroundColor: cictatColors.verde1Soft,
+    borderColor: cictatColors.verde1,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  guiaBannerTextos: {
+    flex: 1,
+    gap: 3,
+  },
+  guiaBannerFilaTitulo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: spacing.xs + 2,
+  },
+  guiaBannerTitulo: {
+    color: cictatColors.carbon,
+    fontWeight: '800',
+  },
+  guiaPill: {
+    backgroundColor: cictatColors.verde2,
+    borderRadius: radius.pill,
+    paddingHorizontal: 7,
+    paddingVertical: 1,
+  },
+  guiaPillTexto: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+    fontSize: 10,
+    letterSpacing: 0.5,
+  },
+  guiaBannerDesc: {
+    color: cictatColors.textSecondary,
+    lineHeight: 18,
+  },
+  guiaBannerAccion: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    paddingHorizontal: spacing.xs,
+  },
+  guiaBannerAccionTexto: {
+    color: cictatColors.verde1,
+    fontWeight: '800',
+  },
   filaEstado: {
     flexDirection: 'row',
     alignItems: 'center',

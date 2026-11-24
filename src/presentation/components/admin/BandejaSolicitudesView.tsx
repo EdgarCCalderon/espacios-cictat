@@ -201,11 +201,11 @@ export const BandejaSolicitudesView: React.FC<BandejaSolicitudesViewProps> = ({
       {/* Banner de alerta si existen colisiones pendientes */}
       {conteos.colisionesPendientes > 0 ? (
         <View style={styles.alertaGlobalColision}>
-          <MaterialCommunityIcons name="alert-decagram" size={22} color={cictatColors.terracotta} />
+          <MaterialCommunityIcons name="alert-decagram" size={22} color={cictatColors.warning} />
           <Text variant="bodySmall" style={styles.alertaGlobalTexto}>
             Hay <Text style={styles.bold}>{conteos.colisionesPendientes}</Text> solicitudes
             pendientes con traslape horario en el mismo espacio y fecha. Revisa las tarjetas marcadas
-            con <Text style={styles.bold}>⚠️ Colisión Pendiente</Text>.
+            con <Text style={styles.bold}>Colisión Pendiente</Text>.
           </Text>
         </View>
       ) : null}
@@ -318,11 +318,11 @@ export const BandejaSolicitudesView: React.FC<BandejaSolicitudesViewProps> = ({
                     <MaterialCommunityIcons
                       name="alert-octagon"
                       size={20}
-                      color={cictatColors.terracotta}
+                      color={cictatColors.warning}
                     />
                     <View style={styles.bannerColisionTextos}>
                       <Text variant="labelLarge" style={styles.bannerColisionTitulo}>
-                        ⚠️ Colisión Pendiente ({sol.colisionaConIds.length}{' '}
+                        Colisión Pendiente ({sol.colisionaConIds.length}{' '}
                         {sol.colisionaConIds.length === 1
                           ? 'solicitud en conflicto'
                           : 'solicitudes en conflicto'}
@@ -350,7 +350,7 @@ export const BandejaSolicitudesView: React.FC<BandejaSolicitudesViewProps> = ({
                       <MaterialCommunityIcons
                         name="calendar-month"
                         size={18}
-                        color={cictatColors.terracotta}
+                        color={cictatColors.verde1}
                       />
                       <View style={styles.flex1}>
                         <Text variant="labelSmall" style={styles.infoLabel}>
@@ -366,7 +366,7 @@ export const BandejaSolicitudesView: React.FC<BandejaSolicitudesViewProps> = ({
                       <MaterialCommunityIcons
                         name="clock-check-outline"
                         size={18}
-                        color={cictatColors.ochre}
+                        color={cictatColors.verde2}
                       />
                       <View style={styles.flex1}>
                         <Text variant="labelSmall" style={styles.infoLabel}>
@@ -435,7 +435,7 @@ export const BandejaSolicitudesView: React.FC<BandejaSolicitudesViewProps> = ({
                           <MaterialCommunityIcons
                             name="file-pdf-box"
                             size={18}
-                            color={cictatColors.terracotta}
+                            color={sol.estado === 'rechazada' ? cictatColors.warning : '#71717A'}
                           />
                           <View style={styles.docTextos}>
                             <Text variant="labelSmall" style={styles.docTipo}>
@@ -728,8 +728,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    backgroundColor: cictatColors.terracottaSoft,
-    borderColor: cictatColors.terracotta,
+    backgroundColor: cictatColors.warningSoft,
+    borderColor: cictatColors.warning,
     borderWidth: 1.5,
     borderRadius: radius.md,
     padding: spacing.md,
@@ -764,7 +764,7 @@ const styles = StyleSheet.create({
     paddingVertical: 1,
   },
   contadorBadgeActivo: {
-    backgroundColor: cictatColors.terracotta,
+    backgroundColor: cictatColors.verde1,
   },
   contadorTexto: { color: cictatColors.carbon, fontWeight: '800' },
   contadorTextoActivo: { color: '#FFFFFF' },
@@ -787,7 +787,7 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   cardColision: {
-    borderColor: cictatColors.terracotta,
+    borderColor: cictatColors.warning,
     borderWidth: 2,
   },
   cardHeader: {
@@ -814,8 +814,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    backgroundColor: cictatColors.ochreSoft,
-    borderColor: cictatColors.ochre,
+    backgroundColor: cictatColors.verde1Soft,
+    borderColor: cictatColors.verde1,
     borderWidth: 1,
     borderRadius: radius.sm,
     paddingVertical: 3,
@@ -832,17 +832,17 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     paddingHorizontal: spacing.md,
   },
-  estadoPendiente: { backgroundColor: cictatColors.ochreSoft, borderColor: cictatColors.ochre },
-  estadoAprobada: { backgroundColor: '#E4F0E7', borderColor: cictatColors.success },
-  estadoRechazada: { backgroundColor: '#FDF2F0', borderColor: cictatColors.danger },
+  estadoPendiente: { backgroundColor: cictatColors.warningSoft, borderColor: cictatColors.warning },
+  estadoAprobada: { backgroundColor: cictatColors.verde1Soft, borderColor: cictatColors.verde1 },
+  estadoRechazada: { backgroundColor: cictatColors.dangerSoft, borderColor: cictatColors.danger },
   estadoCancelada: { backgroundColor: cictatColors.surface, borderColor: cictatColors.borderSoft },
 
   bannerColision: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: spacing.sm,
-    backgroundColor: cictatColors.terracottaSoft,
-    borderColor: cictatColors.terracotta,
+    backgroundColor: cictatColors.warningSoft,
+    borderColor: cictatColors.warning,
     borderWidth: 1.5,
     borderRadius: radius.md,
     padding: spacing.md,
@@ -917,8 +917,8 @@ const styles = StyleSheet.create({
     padding: spacing.md,
   },
   motivoCajaAutoColision: {
-    backgroundColor: cictatColors.terracottaSoft,
-    borderColor: cictatColors.terracotta,
+    backgroundColor: cictatColors.warningSoft,
+    borderColor: cictatColors.warning,
   },
   motivoEtiqueta: { color: cictatColors.carbon, fontWeight: '800', letterSpacing: 0.5 },
   motivoTexto: { color: cictatColors.carbon, fontWeight: '600' },

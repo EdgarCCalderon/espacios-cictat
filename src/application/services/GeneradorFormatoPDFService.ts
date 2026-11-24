@@ -2,7 +2,7 @@
  * Aplicación — GeneradorFormatoPDFService
  *
  * Servicio encargado de generar el Formato Oficial de Solicitud de Reserva
- * de Espacios CICTAT (DACyTI - UJAT) pre-llenado (sin firma digital),
+ * de Espacios CICTAT (UJAT) pre-llenado (sin firma digital),
  * subirlo a Supabase Storage y permitir su descarga o impresión nativa/web.
  */
 import * as Print from 'expo-print';
@@ -132,7 +132,7 @@ export function generarHTMLFormatoCICTAT(
       font-size: 10.5pt;
       margin: 0 0 2px 0;
       font-weight: 600;
-      color: #C88A32;
+      color: #41AD49;
     }
     .header-institucional h3 {
       font-size: 9.5pt;
@@ -142,8 +142,8 @@ export function generarHTMLFormatoCICTAT(
     }
     .titulo-documento {
       display: inline-block;
-      background-color: #1C1917;
-      color: #FAF7F2;
+      background-color: #1C8443;
+      color: #FFFFFF;
       padding: 5px 18px;
       font-size: 11pt;
       font-weight: 700;
@@ -156,8 +156,8 @@ export function generarHTMLFormatoCICTAT(
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background-color: #FAF7F2;
-      border: 1px solid #E5DEC9;
+      background-color: #FAF8F5;
+      border: 1px solid #DCE8DE;
       padding: 7px 12px;
       border-radius: 4px;
       margin-bottom: 14px;
@@ -167,7 +167,7 @@ export function generarHTMLFormatoCICTAT(
       color: #1C1917;
     }
     .badge-estado {
-      background-color: #C88A32;
+      background-color: #1C8443;
       color: #FFFFFF;
       padding: 3px 8px;
       border-radius: 3px;
@@ -181,7 +181,7 @@ export function generarHTMLFormatoCICTAT(
       color: #1C1917;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      border-left: 4px solid #E05A2B;
+      border-left: 4px solid #1C8443;
       padding-left: 8px;
       margin: 12px 0 6px 0;
     }
@@ -199,7 +199,7 @@ export function generarHTMLFormatoCICTAT(
       text-align: left;
     }
     table.tabla-datos th {
-      background-color: #F3EFE6;
+      background-color: #F4F1EA;
       color: #1C1917;
       font-weight: 700;
       width: 28%;
@@ -209,15 +209,15 @@ export function generarHTMLFormatoCICTAT(
       color: #1C1917;
     }
     .nota-limpieza {
-      color: #E05A2B;
+      color: #1C8443;
       font-weight: 700;
       display: block;
       margin-top: 3px;
       font-size: 9pt;
     }
     .tema-caja {
-      background-color: #FAF7F2;
-      border: 1px solid #E5DEC9;
+      background-color: #FAF8F5;
+      border: 1px solid #DCE8DE;
       border-radius: 4px;
       padding: 8px 10px;
       font-style: italic;
@@ -226,8 +226,8 @@ export function generarHTMLFormatoCICTAT(
       white-space: pre-wrap;
     }
     .clausula-responsabilidad {
-      border: 1.5px solid #1C1917;
-      background-color: #FAF7F2;
+      border: 1.5px solid #1C8443;
+      background-color: #FAF8F5;
       border-radius: 4px;
       padding: 10px 12px;
       margin: 14px 0 20px 0;
@@ -236,7 +236,7 @@ export function generarHTMLFormatoCICTAT(
       text-align: justify;
     }
     .clausula-responsabilidad strong {
-      color: #E05A2B;
+      color: #1C8443;
       font-weight: 800;
     }
     .seccion-firmas {
@@ -284,10 +284,10 @@ export function generarHTMLFormatoCICTAT(
   <!-- Barra de Acciones para Visualización Web (Oculta al Imprimir) -->
   <div class="barra-acciones-impresion" style="position: sticky; top: 0; background: #1C1917; color: #FAF7F2; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-radius: 8px; margin-bottom: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.18); font-family: sans-serif; z-index: 9999;">
     <div style="font-size: 14px; font-weight: bold; display: flex; align-items: center; gap: 8px;">
-      <span>📄</span> Formato Oficial de Solicitud de Reserva CICTAT · DACyTI UJAT
+      <span>📄</span> Formato Oficial de Solicitud de Reserva CICTAT · UJAT
     </div>
     <div style="display: flex; gap: 10px;">
-      <button onclick="window.print()" style="background: #E05A2B; color: #FFFFFF; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 6px;">
+      <button onclick="window.print()" style="background: #1C8443; color: #FFFFFF; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 6px;">
         <span>🖨️</span> Imprimir / Guardar como PDF
       </button>
       <button onclick="window.close()" style="background: #44403C; color: #FFFFFF; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px;">
@@ -299,8 +299,8 @@ export function generarHTMLFormatoCICTAT(
   <!-- Encabezado Institucional -->
   <div class="header-institucional">
     <h1>UNIVERSIDAD JUÁREZ AUTÓNOMA DE TABASCO</h1>
-    <h2>División Académica de Ciencias y Tecnologías de la Información (DACyTI)</h2>
-    <h3>Coordinación de Posgrado e Investigación — CICTAT</h3>
+    <h2>Centro de Investigación de Ciencia y Tecnología Aplicada de Tabasco (CICTAT)</h2>
+    <h3>Coordinación de Espacios y Laboratorios</h3>
     <div class="titulo-documento">FORMATO OFICIAL DE SOLICITUD DE RESERVA DE ESPACIO</div>
   </div>
 
@@ -308,7 +308,7 @@ export function generarHTMLFormatoCICTAT(
   <div class="meta-banda">
     <div><strong>FOLIO:</strong> CICTAT-${folioCorto}</div>
     <div><strong>FECHA DE REGISTRO:</strong> ${fechaRegistro}</div>
-    <div><strong>ESTADO:</strong> <span class="badge-estado">${obtenerEtiquetaEstadoFormal(solicitud.estado)}</span></div>
+    <div><strong>ESTADO:</strong> <span class="badge-estado" style="${solicitud.estado === 'rechazada' ? 'background-color: #D97706;' : ''}">${obtenerEtiquetaEstadoFormal(solicitud.estado)}</span></div>
   </div>
 
   <!-- Tabla 1: Datos del Solicitante -->
@@ -336,7 +336,7 @@ export function generarHTMLFormatoCICTAT(
     </tr>
     <tr>
       <th>Dependencia / Procedencia:</th>
-      <td>${usuario.dependencia_procedencia || 'DACyTI — Universidad Juárez Autónoma de Tabasco'}</td>
+      <td>${usuario.dependencia_procedencia || 'CICTAT — Universidad Juárez Autónoma de Tabasco'}</td>
     </tr>
   </table>
 
@@ -379,7 +379,7 @@ export function generarHTMLFormatoCICTAT(
   <!-- Cláusula Legal Obligatoria de Responsabilidad y Deslinde -->
   <div class="clausula-responsabilidad">
     <strong>CARTA COMPROMISO Y DESLINDE DE RESPONSABILIDAD:</strong>
-    Por medio de la presente, el solicitante se compromete a hacer uso adecuado de las instalaciones del CICTAT - DACyTI y a entregar el espacio puntualmente en la hora de finalización establecida para permitir el bloque institucional de limpieza. Asimismo, el solicitante asume total responsabilidad financiera y administrativa en caso de daño, desperfecto o faltante en el mobiliario, instalaciones o equipo tecnológico prestado intrínsecamente con la sala (proyector, laptop, extensión eléctrica y accesorios). Finalmente, la administración de Espacios CICTAT - UJAT se deslinda de toda responsabilidad por objetos personales, documentos o equipos olvidados o extraviados dentro de las instalaciones tras concluir la reserva.
+    Por medio de la presente, el solicitante se compromete a hacer uso adecuado de las instalaciones del CICTAT y a entregar el espacio puntualmente en la hora de finalización establecida para permitir el bloque institucional de limpieza. Asimismo, el solicitante asume total responsabilidad financiera y administrativa en caso de daño, desperfecto o faltante en el mobiliario, instalaciones o equipo tecnológico prestado intrínsecamente con la sala (proyector, laptop, extensión eléctrica y accesorios). Finalmente, la administración de Espacios CICTAT - UJAT se deslinda de toda responsabilidad por objetos personales, documentos o equipos olvidados o extraviados dentro de las instalaciones tras concluir la reserva.
   </div>
 
   <!-- Sección de Firmas Físicas (listas para firmar en físico el día del evento) -->
@@ -387,17 +387,17 @@ export function generarHTMLFormatoCICTAT(
     <div class="bloque-firma">
       <div class="linea-firma"></div>
       <strong>Nombre y Firma Autógrafa del Solicitante</strong><br />
-      <span class="firma-cargo">(Presentar este formato impreso el día del evento)</span>
+      <span class="firma-cargo">(Presentar este formato impreso el día del evento ya firmado por el usuario)</span>
     </div>
     <div class="bloque-firma">
       <div class="linea-firma"></div>
       <strong>Sello y Firma del Encargado de Espacios CICTAT</strong><br />
-      <span class="firma-cargo">(Validación presencial DACyTI - UJAT)</span>
+      <span class="firma-cargo">(Validación presencial CICTAT - UJAT)</span>
     </div>
   </div>
 
   <div class="pie-folio">
-    Sistema de Gestión de Espacios CICTAT · DACyTI — UJAT · Documento generado electrónicamente sin validez de reserva hasta recabar visto bueno y firmas presenciales.
+    Sistema de Gestión de Espacios CICTAT · UJAT · Documento generado electrónicamente sin validez de reserva hasta recabar visto bueno y firmas presenciales.
   </div>
 
 </body>

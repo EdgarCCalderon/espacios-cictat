@@ -232,7 +232,7 @@ export class PanelAdminController {
       hora_inicio: '11:00:00',
       hora_fin: '13:00:00',
       hora_fin_limpieza: '14:00:00',
-      tema_evento: '[DEMO ESTUDIO POSGRADO]Asesoría y revisión de tesis de maestría DACyTI',
+      tema_evento: '[DEMO ESTUDIO POSGRADO]Asesoría y revisión de tesis de posgrado CICTAT',
     });
 
     const creadas = [s1, s2, s3];

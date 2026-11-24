@@ -117,12 +117,12 @@ export const SesionButton: React.FC<SesionButtonProps> = ({ onIniciarSesion }) =
         onPress={() => void manejarSalir()}
         disabled={saliendo}
         accessibilityRole="button"
-        accessibilityLabel="Salir de la sesión"
+        accessibilityLabel="Cerrar sesión"
         style={({ pressed }) => [styles.botonSalir, pressed && styles.pressed]}
       >
         <MaterialCommunityIcons name="logout" size={16} color="#FFFFFF" />
         <Text variant="labelMedium" style={styles.textoSalir}>
-          {saliendo ? '…' : 'Salir'}
+          {saliendo ? '…' : 'Cerrar Sesión'}
         </Text>
       </Pressable>
     </View>
@@ -186,25 +186,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm + 2,
   },
   rolChipOchre: {
-    backgroundColor: cictatColors.ochre,
+    backgroundColor: cictatColors.verde2,
   },
   rolChipSurface: {
     backgroundColor: cictatColors.surface,
   },
   rolChipTexto: {
-    color: cictatColors.carbon,
+    color: '#FFFFFF',
     fontWeight: '800',
   },
   matriculaChip: {
-    backgroundColor: cictatColors.ochreSoft,
-    borderColor: cictatColors.ochre,
+    backgroundColor: cictatColors.verde1Soft,
+    borderColor: cictatColors.verde1,
     borderWidth: 1,
     borderRadius: radius.sm,
     paddingVertical: 2,
     paddingHorizontal: spacing.sm,
   },
   matriculaTexto: {
-    color: cictatColors.carbon,
+    color: cictatColors.verde1,
     fontWeight: '800',
     letterSpacing: 0.5,
   },
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: cictatColors.terracotta,
+    backgroundColor: cictatColors.carbon,
     borderColor: cictatColors.carbon,
     borderWidth: 1.5,
     borderRadius: radius.pill,

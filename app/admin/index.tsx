@@ -169,7 +169,7 @@ export default function PanelAdminScreen() {
             <View style={styles.sidebarTop}>
               <BrushTitle text="Admin CICTAT" highlight="CICTAT" size="md" />
               <Text variant="labelSmall" style={styles.sidebarSub}>
-                DACyTI · UJAT · CONTROL CENTRAL
+                CICTAT · UJAT · CONTROL CENTRAL
               </Text>
 
               {/* Datos del encargado activo */}
@@ -259,9 +259,9 @@ export default function PanelAdminScreen() {
                 icon="logout"
                 onPress={() => void manejarCerrarSesion()}
                 buttonColor={cictatColors.carbon}
-                textColor="#ffffff"
+                textColor="#FFFFFF"
                 style={styles.btnSalirSidebar}
-                labelStyle={styles.bold}
+                labelStyle={styles.btnSalirSidebarLabel}
               >
                 Cerrar Sesión
               </Button>
@@ -309,7 +309,7 @@ export default function PanelAdminScreen() {
                 <IconButton
                   icon="logout"
                   size={20}
-                  iconColor="#e81313"
+                  iconColor="#FFFFFF"
                   containerColor={cictatColors.carbon}
                   onPress={() => void manejarCerrarSesion()}
                   accessibilityLabel="Cerrar sesión"
@@ -475,6 +475,10 @@ const styles = StyleSheet.create({
   },
   btnSalirSidebar: {
     borderRadius: radius.md,
+  },
+  btnSalirSidebarLabel: {
+    color: '#FFFFFF',
+    fontWeight: '800',
   },
 
   // Área principal

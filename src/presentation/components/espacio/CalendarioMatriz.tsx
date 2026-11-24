@@ -40,14 +40,14 @@ const APARIENCIA = {
     colorIcono: cictatColors.success,
   },
   pendiente: {
-    fondo: cictatColors.ochreSoft,
-    borde: cictatColors.ochre,
+    fondo: cictatColors.warningSoft,
+    borde: cictatColors.warning,
     bordeEstilo: 'solid',
     colorTexto: cictatColors.carbon,
-    colorSub: '#6B4A12',
+    colorSub: '#9A3412',
     icono: 'timer-sand',
-    colorIcono: '#9A6A1C',
-    franja: cictatColors.ochre,
+    colorIcono: cictatColors.warning,
+    franja: cictatColors.warning,
   },
   ocupado: {
     fondo: cictatColors.carbon,
@@ -56,8 +56,8 @@ const APARIENCIA = {
     colorTexto: '#FFFFFF',
     colorSub: '#D6D3D1',
     icono: 'lock',
-    colorIcono: cictatColors.terracotta,
-    franja: cictatColors.terracotta,
+    colorIcono: cictatColors.verde1,
+    franja: cictatColors.verde1,
   },
   limpieza: {
     fondo: '#EDE6DA',
@@ -69,7 +69,7 @@ const APARIENCIA = {
     colorIcono: cictatColors.textSecondary,
   },
   seleccionado: {
-    fondo: cictatColors.terracotta,
+    fondo: cictatColors.verde1,
     borde: cictatColors.carbon,
     bordeEstilo: 'solid',
     colorTexto: '#FFFFFF',
@@ -178,8 +178,8 @@ const BloqueRow: React.FC<{
 
 const LEYENDA: { color: string; borde: string; etiqueta: string; dashed?: boolean }[] = [
   { color: cictatColors.surfaceElevated, borde: cictatColors.borderSoft, etiqueta: 'Disponible' },
-  { color: cictatColors.ochre, borde: cictatColors.ochre, etiqueta: 'Solicitudes pendientes' },
-  { color: cictatColors.carbon, borde: cictatColors.terracotta, etiqueta: 'Reserva Aprobada' },
+  { color: cictatColors.warning, borde: cictatColors.warning, etiqueta: 'Solicitudes pendientes' },
+  { color: cictatColors.verde1, borde: cictatColors.verde1, etiqueta: 'Reserva Aprobada' },
   { color: '#EDE6DA', borde: '#A8A29E', etiqueta: 'Bloqueo Limpieza +1h', dashed: true },
 ];
 

@@ -220,7 +220,7 @@ export default function UjatAuthScreen() {
             />
             <Text variant="bodySmall" style={styles.avisoModoTexto}>
               Activación institucional: escribe tu matrícula, tu nombre completo y define tu
-              contraseña para crear tu perfil en DACyTI - CICTAT.
+              contraseña para crear tu perfil en el CICTAT.
             </Text>
           </View>
         ) : null}

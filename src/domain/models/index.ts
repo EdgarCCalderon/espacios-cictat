@@ -89,7 +89,7 @@ export interface PerfilUsuario {
   /** Matrícula UJAT (sólo comunidad de posgrado). */
   matricula: string | null;
   telefono: string | null;
-  /** Dependencia / institución de procedencia (p. ej. "DACyTI - CICTAT" o una empresa externa). */
+  /** Dependencia / institución de procedencia (p. ej. "CICTAT - UJAT" o una empresa externa). */
   dependencia_procedencia: string | null;
   created_at: ISODateTime;
 }
@@ -120,10 +120,31 @@ export interface Espacio {
   /** Si es `true`, sólo alumnos de posgrado (y administradores) pueden reservarlo. */
   exclusivo_alumnos_posgrado: boolean;
   imagen_url: string | null;
+  /** Galería de hasta 3 fotografías JPG del espacio */
+  imagenes?: string[] | null;
   /** `false` ⇒ "En Mantenimiento". */
   esta_activo: boolean;
   created_at: ISODateTime;
   updated_at: ISODateTime;
+}
+
+/** Obtiene la lista de hasta 3 imágenes de un espacio (parseando `imagenes` o `imagen_url`). */
+export function obtenerImagenesEspacio(espacio: Espacio): string[] {
+  if (Array.isArray(espacio.imagenes) && espacio.imagenes.length > 0) {
+    return espacio.imagenes.filter(Boolean);
+  }
+  if (!espacio.imagen_url) return [];
+  const raw = espacio.imagen_url.trim();
+  if (raw.startsWith('[') && raw.endsWith(']')) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed.filter((s) => typeof s === 'string' && s.length > 0);
+    } catch {}
+  }
+  if (raw.includes('||')) {
+    return raw.split('||').map((s) => s.trim()).filter(Boolean);
+  }
+  return [raw];
 }
 
 /** Tabla `solicitudes_reservas`. */

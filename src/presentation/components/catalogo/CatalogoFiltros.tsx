@@ -1,5 +1,5 @@
 /**
- * <CatalogoFiltros /> — Chips de filtro (Crema / Carbón / Terracota).
+ * <CatalogoFiltros /> — Chips de filtro con paleta institucional de tres verdes.
  */
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import React from 'react';
@@ -37,7 +37,7 @@ const FiltroChip: React.FC<FiltroChipProps> = ({ etiqueta, seleccionado, conCand
       <MaterialCommunityIcons
         name="lock"
         size={14}
-        color={seleccionado ? '#FFFFFF' : cictatColors.ochre}
+        color={seleccionado ? '#FFFFFF' : cictatColors.verde2}
       />
     ) : null}
   </Pressable>
@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
   },
   chipInactivo: { backgroundColor: cictatColors.surface },
-  chipActivo: { backgroundColor: cictatColors.terracotta },
+  chipActivo: { backgroundColor: cictatColors.verde1 },
   chipPressed: { opacity: 0.8 },
   texto: { fontWeight: '700' },
 });

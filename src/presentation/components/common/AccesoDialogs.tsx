@@ -42,7 +42,7 @@ export const AccesoPosgradoDialog: React.FC<AccesoPosgradoDialogProps> = ({
         <Text variant="bodyMedium" style={styles.texto}>
           Los <Text style={styles.bold}>Cubículos 7, 8 y 9</Text>, con capacidad para{' '}
           <Text style={styles.bold}>5 personas</Text>, son de uso exclusivo para{' '}
-          <Text style={styles.bold}>Estudiantes de Posgrado</Text> de la DACyTI.
+          <Text style={styles.bold}>Estudiantes de Posgrado</Text> del CICTAT.
         </Text>
         {rolActual ? (
           <Text variant="bodySmall" style={styles.nota}>
@@ -169,9 +169,9 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: radius.pill,
-    backgroundColor: cictatColors.ochre,
+    backgroundColor: cictatColors.verde1Soft,
     borderWidth: 1.5,
-    borderColor: cictatColors.carbon,
+    borderColor: cictatColors.verde1,
     alignItems: 'center',
     justifyContent: 'center',
   },

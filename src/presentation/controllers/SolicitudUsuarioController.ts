@@ -107,7 +107,7 @@ class SolicitudUsuarioController {
         return {
           ok: false,
           error:
-            'Este espacio (Cubículo de estudio) es de uso exclusivo para Alumnos de Posgrado de la DACyTI - UJAT.',
+            'Este espacio (Cubículo de estudio) es de uso exclusivo para Alumnos de Posgrado del CICTAT - UJAT.',
         };
       }
     }

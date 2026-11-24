@@ -7,7 +7,7 @@ import { ETIQUETA_ROL, type RolUsuario } from '../models';
 // Constantes
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const DEPENDENCIA_COMUNIDAD_UJAT = 'DACyTI - CICTAT';
+export const DEPENDENCIA_COMUNIDAD_UJAT = 'CICTAT - UJAT';
 export const DOMINIO_ALUMNOS = 'alumno.ujat.mx';
 export const DOMINIO_DOCTORES = 'ujat.mx';
 /** Mínimo de Supabase Auth por defecto. */

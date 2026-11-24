@@ -124,15 +124,15 @@ export const CalendarioMaestroView: React.FC<CalendarioMaestroViewProps> = ({
 
         {/* Leyenda de colores */}
         <View style={styles.leyendaRow}>
-          <LeyendaChip color="#E4F0E7" borde={cictatColors.success} texto="Libre" />
+          <LeyendaChip color={cictatColors.verde1Soft} borde={cictatColors.verde1} texto="Libre" />
           <LeyendaChip
-            color={cictatColors.ochreSoft}
-            borde={cictatColors.ochre}
+            color={cictatColors.warningSoft}
+            borde={cictatColors.warning}
             texto="Pendiente de Dictamen"
           />
           <LeyendaChip
-            color={cictatColors.terracottaSoft}
-            borde={cictatColors.terracotta}
+            color={cictatColors.verde2Soft}
+            borde={cictatColors.verde2}
             texto="Reservado (Aprobada)"
           />
           <LeyendaChip
@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
   },
   espCodigo: { color: cictatColors.carbon, fontWeight: '800' },
   espNombre: { color: cictatColors.textSecondary },
-  mantTag: { color: cictatColors.terracotta, fontWeight: '800' },
+  mantTag: { color: cictatColors.warning, fontWeight: '800' },
 
   celdaBloque: {
     width: 96,
@@ -402,16 +402,16 @@ const styles = StyleSheet.create({
     borderLeftColor: cictatColors.borderSoft,
     gap: 2,
   },
-  bloqueLibre: { backgroundColor: '#F2F8F3' },
-  bloquePendiente: { backgroundColor: cictatColors.ochreSoft },
-  bloqueOcupado: { backgroundColor: cictatColors.terracottaSoft },
+  bloqueLibre: { backgroundColor: cictatColors.verde1Soft },
+  bloquePendiente: { backgroundColor: cictatColors.warningSoft },
+  bloqueOcupado: { backgroundColor: cictatColors.verde2Soft },
   bloqueLimpieza: { backgroundColor: cictatColors.surface },
   bloqueMant: { backgroundColor: '#ECE7DF' },
   bloqueNeutro: { backgroundColor: cictatColors.surfaceElevated },
 
-  textoLibre: { color: cictatColors.success, fontWeight: '700' },
-  textoPendiente: { color: '#7A4E0E', fontWeight: '800' },
-  textoOcupado: { color: cictatColors.terracotta, fontWeight: '800' },
+  textoLibre: { color: cictatColors.verde1, fontWeight: '700' },
+  textoPendiente: { color: cictatColors.warning, fontWeight: '800' },
+  textoOcupado: { color: cictatColors.verde2, fontWeight: '800' },
   textoLimpieza: { color: cictatColors.carbon, fontWeight: '700' },
   bloqueTextoMuted: { color: cictatColors.textSecondary },
 

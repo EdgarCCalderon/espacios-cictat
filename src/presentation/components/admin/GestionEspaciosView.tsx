@@ -6,8 +6,9 @@
  *  - Editar la capacidad, equipamiento incluido y reglamento de cualquier unidad.
  */
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import * as DocumentPicker from 'expo-document-picker';
 import React, { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, View } from 'react-native';
 import {
   Button,
   Dialog,
@@ -18,7 +19,7 @@ import {
   TextInput,
 } from 'react-native-paper';
 
-import type { Espacio, UUID } from '@/domain/models';
+import { obtenerImagenesEspacio, type Espacio, type UUID } from '@/domain/models';
 import { BadgeEstadoEspacio, BadgeExclusivo } from '../catalogo/Badges';
 import {
   cictatColors,
@@ -44,6 +45,7 @@ export const GestionEspaciosView: React.FC<GestionEspaciosViewProps> = ({
   const [capacidadTxt, setCapacidadTxt] = useState('');
   const [equipamientoTxt, setEquipamientoTxt] = useState('');
   const [reglamentoTxt, setReglamentoTxt] = useState('');
+  const [imagenes, setImagenes] = useState<string[]>(['', '', '']);
   const [errorCapacidad, setErrorCapacidad] = useState<string | null>(null);
 
   const abrirEdicion = (espacio: Espacio) => {
@@ -51,7 +53,26 @@ export const GestionEspaciosView: React.FC<GestionEspaciosViewProps> = ({
     setCapacidadTxt(String(espacio.capacidad));
     setEquipamientoTxt(espacio.equipamiento_incluido ?? '');
     setReglamentoTxt(espacio.reglamento ?? '');
+    const imgs = obtenerImagenesEspacio(espacio);
+    setImagenes([imgs[0] ?? '', imgs[1] ?? '', imgs[2] ?? '']);
     setErrorCapacidad(null);
+  };
+
+  const seleccionarFotoJpg = async (idx: number) => {
+    try {
+      const res = await DocumentPicker.getDocumentAsync({
+        type: ['image/jpeg', 'image/jpg'],
+        copyToCacheDirectory: true,
+      });
+      if (!res.canceled && res.assets && res.assets.length > 0) {
+        const uri = res.assets[0].uri;
+        const copia = [...imagenes];
+        copia[idx] = uri;
+        setImagenes(copia);
+      }
+    } catch (err) {
+      console.warn('[GestionEspacios] Error seleccionando JPG:', err);
+    }
   };
 
   const guardarEdicion = async () => {
@@ -62,10 +83,14 @@ export const GestionEspaciosView: React.FC<GestionEspaciosViewProps> = ({
       return;
     }
 
+    const imgsLimpias = imagenes.map((s) => s.trim()).filter(Boolean);
+
     const ok = await onActualizarEspacio(editando.id, {
       capacidad: cap,
       equipamiento_incluido: equipamientoTxt.trim() || null,
       reglamento: reglamentoTxt.trim() || null,
+      imagen_url: imgsLimpias.length > 0 ? imgsLimpias.join('||') : null,
+      imagenes: imgsLimpias,
     });
     if (ok) {
       setEditando(null);
@@ -208,51 +233,138 @@ export const GestionEspaciosView: React.FC<GestionEspaciosViewProps> = ({
           <Dialog.Title style={styles.titulo}>
             Editar {editando?.codigo_espacio} · {editando?.nombre}
           </Dialog.Title>
-          <Dialog.Content style={styles.dialogContent}>
-            <View>
+          <Dialog.ScrollArea style={styles.dialogScrollArea}>
+            <ScrollView
+              contentContainerStyle={styles.dialogScrollContent}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={true}
+            >
+              <View>
+                <TextInput
+                  mode="outlined"
+                  label="Capacidad máxima (personas) *"
+                  keyboardType="number-pad"
+                  value={capacidadTxt}
+                  onChangeText={(v) => {
+                    setCapacidadTxt(v);
+                    if (errorCapacidad) setErrorCapacidad(null);
+                  }}
+                  error={!!errorCapacidad}
+                  left={<TextInput.Icon icon="account-group-outline" />}
+                  style={styles.input}
+                />
+                {errorCapacidad ? (
+                  <HelperText type="error" visible padding="none">
+                    {errorCapacidad}
+                  </HelperText>
+                ) : null}
+              </View>
+
               <TextInput
                 mode="outlined"
-                label="Capacidad máxima (personas) *"
-                keyboardType="number-pad"
-                value={capacidadTxt}
-                onChangeText={(v) => {
-                  setCapacidadTxt(v);
-                  if (errorCapacidad) setErrorCapacidad(null);
-                }}
-                error={!!errorCapacidad}
-                left={<TextInput.Icon icon="account-group-outline" />}
+                label="Equipamiento incluido"
+                placeholder="Ej. Proyector HDMI, pizarrón, laptop y contactos eléctricos"
+                value={equipamientoTxt}
+                onChangeText={setEquipamientoTxt}
+                multiline
+                numberOfLines={3}
                 style={styles.input}
               />
-              {errorCapacidad ? (
-                <HelperText type="error" visible padding="none">
-                  {errorCapacidad}
-                </HelperText>
-              ) : null}
-            </View>
 
-            <TextInput
-              mode="outlined"
-              label="Equipamiento incluido"
-              placeholder="Ej. Proyector HDMI, pizarrón, laptop y contactos eléctricos"
-              value={equipamientoTxt}
-              onChangeText={setEquipamientoTxt}
-              multiline
-              numberOfLines={3}
-              style={styles.input}
-            />
+              <TextInput
+                mode="outlined"
+                label="Reglamento del espacio"
+                placeholder="Ej. Prohibido ingresar alimentos; dejar limpio al finalizar..."
+                value={reglamentoTxt}
+                onChangeText={setReglamentoTxt}
+                multiline
+                numberOfLines={3}
+                style={styles.input}
+              />
 
-            <TextInput
-              mode="outlined"
-              label="Reglamento del espacio"
-              placeholder="Ej. Prohibido ingresar alimentos; dejar limpio al finalizar..."
-              value={reglamentoTxt}
-              onChangeText={setReglamentoTxt}
-              multiline
-              numberOfLines={3}
-              style={styles.input}
-            />
-          </Dialog.Content>
-          <Dialog.Actions>
+              {/* Apartado para subir hasta 3 fotografías del espacio */}
+              <View style={styles.seccionFotos}>
+                <View style={styles.seccionFotosHeader}>
+                  <MaterialCommunityIcons name="image-multiple-outline" size={20} color={cictatColors.verde1} />
+                  <View style={styles.seccionFotosTextos}>
+                    <Text variant="titleSmall" style={styles.seccionFotosTitulo}>
+                      Galería Fotográfica del Espacio (Hasta 3 imágenes)
+                    </Text>
+                    <Text variant="bodySmall" style={styles.seccionFotosSub}>
+                      Solo se mostrarán al usuario cuando ingrese a la sala.
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={styles.slotsFotosContenedor}>
+                  {[0, 1, 2].map((idx) => {
+                    const img = imagenes[idx];
+                    const titulos = [
+                      'Foto 1 (.jpg) · Vista Principal',
+                      'Foto 2 (.jpg) · Pizarrón y Pantalla',
+                      'Foto 3 (.jpg) · Conexiones y Capacidad',
+                    ];
+
+                    return (
+                      <View key={idx} style={styles.slotFotoItem}>
+                        <View style={styles.slotFotoHeader}>
+                          <Text variant="labelSmall" style={styles.slotFotoTitulo}>
+                            {titulos[idx]}
+                          </Text>
+                          {img ? (
+                            <Button
+                              compact
+                              mode="text"
+                              icon="trash-can-outline"
+                              textColor={cictatColors.danger}
+                              onPress={() => {
+                                const copia = [...imagenes];
+                                copia[idx] = '';
+                                setImagenes(copia);
+                              }}
+                              labelStyle={styles.btnQuitarLabel}
+                            >
+                              Quitar
+                            </Button>
+                          ) : null}
+                        </View>
+
+                        {img ? (
+                          <View style={styles.previewFotoWrap}>
+                            <Image source={{ uri: img }} style={styles.previewFotoImg} resizeMode="cover" />
+                            <View style={styles.previewBadgeJpg}>
+                              <Text variant="labelSmall" style={styles.previewBadgeJpgTexto}>
+                                JPG Cargado
+                              </Text>
+                            </View>
+                          </View>
+                        ) : (
+                          <View style={styles.slotFotoVacio}>
+                            <MaterialCommunityIcons name="camera-plus-outline" size={22} color="#71717A" />
+                            <Text variant="bodySmall" style={styles.slotFotoVacioTexto}>
+                              Espacio reservado para archivo JPG
+                            </Text>
+                            <Button
+                              mode="outlined"
+                              compact
+                              icon="upload"
+                              onPress={() => void seleccionarFotoJpg(idx)}
+                              style={styles.btnSubirJpg}
+                              labelStyle={styles.btnSubirJpgLabel}
+                              textColor={cictatColors.carbon}
+                            >
+                              Subir JPG
+                            </Button>
+                          </View>
+                        )}
+                      </View>
+                    );
+                  })}
+                </View>
+              </View>
+            </ScrollView>
+          </Dialog.ScrollArea>
+          <Dialog.Actions style={styles.dialogActions}>
             <Button
               onPress={() => setEditando(null)}
               textColor={cictatColors.textSecondary}
@@ -264,7 +376,7 @@ export const GestionEspaciosView: React.FC<GestionEspaciosViewProps> = ({
               icon="content-save-outline"
               loading={!!editando && procesandoId === editando.id}
               onPress={() => void guardarEdicion()}
-              buttonColor={cictatColors.terracotta}
+              buttonColor={cictatColors.verde1}
               textColor="#FFFFFF"
               labelStyle={styles.bold}
             >
@@ -375,10 +487,115 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     borderWidth: 1.5,
     borderColor: cictatColors.carbon,
-    maxWidth: 500,
-    width: '92%',
+    maxWidth: 540,
+    width: '94%',
     alignSelf: 'center',
+    maxHeight: '90%',
   },
-  dialogContent: { gap: spacing.md },
+  dialogScrollArea: {
+    paddingHorizontal: 0,
+    flexShrink: 1,
+  },
+  dialogScrollContent: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    gap: spacing.md,
+  },
+  dialogActions: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+  },
   input: { backgroundColor: cictatColors.surfaceElevated },
+
+  seccionFotos: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    padding: spacing.md,
+    gap: spacing.sm,
+    marginTop: spacing.xs,
+  },
+  seccionFotosHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  seccionFotosTextos: { flex: 1, gap: 2 },
+  seccionFotosTitulo: {
+    color: cictatColors.carbon,
+    fontWeight: '800',
+  },
+  seccionFotosSub: {
+    color: '#64748B',
+    lineHeight: 16,
+  },
+  slotsFotosContenedor: { gap: spacing.sm },
+  slotFotoItem: {
+    backgroundColor: cictatColors.surfaceElevated,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    padding: spacing.sm,
+    gap: spacing.xs,
+  },
+  slotFotoHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  slotFotoTitulo: {
+    color: cictatColors.carbon,
+    fontWeight: '700',
+  },
+  btnQuitarLabel: { fontSize: 11, fontWeight: '700' },
+  previewFotoWrap: {
+    position: 'relative',
+    height: 110,
+    borderRadius: radius.sm,
+    overflow: 'hidden',
+    backgroundColor: '#000',
+  },
+  previewFotoImg: {
+    width: '100%',
+    height: '100%',
+  },
+  previewBadgeJpg: {
+    position: 'absolute',
+    bottom: 6,
+    left: 6,
+    backgroundColor: cictatColors.verde1,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: radius.sm,
+  },
+  previewBadgeJpgTexto: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+    fontSize: 10,
+  },
+  slotFotoVacio: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: spacing.md,
+    backgroundColor: '#F8FAFC',
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    borderStyle: 'dashed',
+    gap: 4,
+  },
+  slotFotoVacioTexto: {
+    color: '#64748B',
+    fontSize: 12,
+  },
+  btnSubirJpg: {
+    borderColor: '#94A3B8',
+    borderRadius: radius.pill,
+    marginTop: 2,
+  },
+  btnSubirJpgLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
 });

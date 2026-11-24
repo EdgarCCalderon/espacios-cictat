@@ -57,7 +57,7 @@ export const DateStrip: React.FC<DateStripProps> = ({ dias, seleccionado, hoyISO
           iconColor={cictatColors.carbon}
         />
         <View style={styles.fechaWrap}>
-          <MaterialCommunityIcons name="calendar" size={18} color={cictatColors.terracotta} />
+          <MaterialCommunityIcons name="calendar" size={18} color={cictatColors.verde1} />
           <Text variant="titleSmall" style={styles.fechaLarga} numberOfLines={2}>
             {formatearFechaLarga(seleccionado)}
           </Text>
@@ -129,11 +129,11 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
   },
   pillInactivo: { backgroundColor: cictatColors.surfaceElevated },
-  pillActivo: { backgroundColor: cictatColors.terracotta },
+  pillActivo: { backgroundColor: cictatColors.verde1 },
   pillMuted: { opacity: 0.5, borderStyle: 'dashed' },
   dow: { color: cictatColors.textSecondary, fontWeight: '700', letterSpacing: 0.6 },
   num: { color: cictatColors.carbon, fontWeight: '800' },
-  mes: { color: cictatColors.ochre, fontWeight: '800', letterSpacing: 0.6 },
+  mes: { color: cictatColors.verde2, fontWeight: '800', letterSpacing: 0.6 },
   textoActivo: { color: '#FFFFFF' },
 });
 

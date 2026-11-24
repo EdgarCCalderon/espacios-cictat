@@ -1,40 +1,78 @@
 /**
  * Presentación — Sistema de Diseño "Espacios CICTAT".
  *
- * Paleta cálida institucional (crema / carbón / ocre / terracota) aplicada
- * sobre `MD3LightTheme` de react-native-paper, más tokens de espaciado,
- * radios y un helper de sombras multiplataforma.
+ * Paleta institucional basada en la gama de tres verdes oficiales:
+ * - Verde 1 (PANTONE 356 C · RGB 28, 132, 67): Color predominante / Primario
+ * - Verde 2 (PANTONE 362 C · RGB 65, 173, 73): Acompañamiento y contraste / Secundario
+ * - Verde 3 (PANTONE 376 C · RGB 141, 198, 66): Armonía cromática y acentos
+ *
+ * Estados de advertencia y error preservados explícitamente en naranja y rojo.
  */
 import { Platform, type ViewStyle } from 'react-native';
 import { MD3LightTheme, useTheme, type MD3Theme } from 'react-native-paper';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Paleta base
+// Paleta base institucional
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const cictatColors = {
-  /** Blanco hueso / crema cálido principal. */
-  background: '#FAF7F2',
+  /** Blanco hueso / crema suave principal para fondos. */
+  background: '#FAF8F5',
   /** Crema suave para tarjetas y contenedores. */
-  surface: '#F3EFE6',
+  surface: '#F4F1EA',
   surfaceElevated: '#FFFFFF',
   /** Negro carbón para tipografía y bordes estructurales. */
   carbon: '#1C1917',
   textPrimary: '#1C1917',
   textSecondary: '#57534E',
-  /** Secundario / institucional: badges, capacidad, bordes secundarios. */
-  ochre: '#C88A32',
-  /** Acento estratégico / CTA: botón principal, sombras cálidas, pinceladas. */
-  terracotta: '#E05A2B',
-  /** Borde estructural suave (alternativa al carbón). */
-  borderSoft: '#E5DEC9',
 
-  // Derivados de apoyo
-  terracottaSoft: '#FBE3D8',
-  ochreSoft: '#F5E6CC',
-  success: '#3F7D4E',
-  warning: '#C88A32',
+  // Gama de tres verdes institucionales (según manual oficial)
+  /** Verde 1 (PANTONE 356 C): Color predominante principal. */
+  verde1: '#1C8443',
+  /** Verde 2 (PANTONE 362 C): Color de acompañamiento y contraste. */
+  verde2: '#41AD49',
+  /** Verde 3 (PANTONE 376 C): Color para armonía cromática y badges luminosos. */
+  verde3: '#8DC642',
+
+  // Derivados suaves de los tres verdes para fondos y contenedores
+  verde1Soft: '#E2F3E7',
+  verde2Soft: '#EAF6EB',
+  verde3Soft: '#F2F9E8',
+
+  /** Color primario de la aplicación (Verde 1 predominante). */
+  primary: '#1C8443',
+  primarySoft: '#E2F3E7',
+  /** Color secundario institucional (Verde 2). */
+  secondary: '#41AD49',
+  secondarySoft: '#EAF6EB',
+  /** Acento terciario (Verde 3). */
+  tertiary: '#8DC642',
+  tertiarySoft: '#F2F9E8',
+
+  /** Borde estructural neutro suave (zinc/gris balanceado para no sobresaturar). */
+  borderSoft: '#E4E4E7',
+
+  // Escala de grises balanceada para evitar sobresaturación
+  grayLight: '#F4F4F5',
+  grayBorder: '#E4E4E7',
+  grayText: '#71717A',
+  grayDark: '#27272A',
+
+  // Advertencias y errores (mantenidos explícitamente en naranja o rojo)
+  /** Advertencias / estados pendientes / alertas en naranja. */
+  warning: '#D97706',
+  warningSoft: '#FEF3C7',
+  /** Peligro / rechazos / cancelaciones / errores en rojo. */
   danger: '#B3261E',
+  dangerSoft: '#FDF2F0',
+  /** Operaciones exitosas / disponibilidad (alineado con Verde 1). */
+  success: '#1C8443',
+
+  // Aliases de compatibilidad para componentes existentes
+  terracotta: '#1C8443',
+  terracottaSoft: '#E2F3E7',
+  ochre: '#41AD49',
+  ochreSoft: '#EAF6EB',
 } as const;
 
 export type CictatColorName = keyof typeof cictatColors;
@@ -68,24 +106,26 @@ export const radius = {
 export type BorderVariant = 'structural' | 'soft' | 'none';
 
 export interface TerracottaShadowOptions {
-  /** `structural` = 1px carbón (#1C1917), `soft` = 1px #E5DEC9. */
+  /** `structural` = 1px carbón (#1C1917), `soft` = 1px borderSoft. */
   border?: BorderVariant;
   /** Multiplicador de intensidad (1 = valores base del sistema). */
   intensity?: number;
 }
 
+export type InstitutionalShadowOptions = TerracottaShadowOptions;
+
 /**
- * Sombra sutil con tinte terracota + borde estructural fino.
+ * Sombra institucional con tinte de Verde 1 predominante (#1C8443) + borde fino.
  *
  * - iOS:     `shadow*` nativos.
- * - Android: `elevation` + `shadowColor` (tinte soportado en API 28+).
- * - Web:     `boxShadow` CSS (react-native-web desaconseja `shadow*`).
+ * - Android: `elevation` + `shadowColor`.
+ * - Web:     `boxShadow` CSS.
  */
 export const getTerracottaShadow = ({
   border = 'soft',
   intensity = 1,
 }: TerracottaShadowOptions = {}): ViewStyle => {
-  const opacity = +(0.14 * intensity).toFixed(3);
+  const opacity = +(0.15 * intensity).toFixed(3);
   const blur = Math.round(10 * intensity);
   const offsetY = Math.round(4 * intensity);
 
@@ -100,22 +140,24 @@ export const getTerracottaShadow = ({
 
   const shadowStyle = Platform.select<ViewStyle>({
     ios: {
-      shadowColor: cictatColors.terracotta,
+      shadowColor: cictatColors.verde1,
       shadowOpacity: opacity,
       shadowRadius: blur,
       shadowOffset: { width: 0, height: offsetY },
     },
     android: {
-      shadowColor: cictatColors.terracotta,
+      shadowColor: cictatColors.verde1,
       elevation: Math.max(1, Math.round(4 * intensity)),
     },
     default: {
-      boxShadow: `0px ${offsetY}px ${blur}px rgba(224, 90, 43, ${opacity})`,
+      boxShadow: `0px ${offsetY}px ${blur}px rgba(28, 132, 67, ${opacity})`,
     },
   });
 
   return { ...borderStyle, ...shadowStyle };
 };
+
+export const getInstitutionalShadow = getTerracottaShadow;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Tema react-native-paper (MD3)
@@ -128,27 +170,27 @@ export const cictatTheme = {
   colors: {
     ...MD3LightTheme.colors,
 
-    primary: cictatColors.terracotta,
+    primary: cictatColors.verde1,
     onPrimary: '#FFFFFF',
-    primaryContainer: cictatColors.terracottaSoft,
-    onPrimaryContainer: '#5A1E08',
+    primaryContainer: cictatColors.verde1Soft,
+    onPrimaryContainer: '#0B4720',
 
-    secondary: cictatColors.ochre,
-    onSecondary: cictatColors.carbon,
-    secondaryContainer: cictatColors.ochreSoft,
-    onSecondaryContainer: '#4A3210',
+    secondary: cictatColors.verde2,
+    onSecondary: '#FFFFFF',
+    secondaryContainer: cictatColors.verde2Soft,
+    onSecondaryContainer: '#135019',
 
-    tertiary: cictatColors.carbon,
-    onTertiary: cictatColors.background,
-    tertiaryContainer: '#E7E5E4',
-    onTertiaryContainer: cictatColors.carbon,
+    tertiary: cictatColors.verde3,
+    onTertiary: cictatColors.carbon,
+    tertiaryContainer: cictatColors.verde3Soft,
+    onTertiaryContainer: '#22470A',
 
     background: cictatColors.background,
     onBackground: cictatColors.textPrimary,
 
     surface: cictatColors.surface,
     onSurface: cictatColors.textPrimary,
-    surfaceVariant: '#ECE5D6',
+    surfaceVariant: '#E7EFE8',
     onSurfaceVariant: cictatColors.textSecondary,
     surfaceDisabled: 'rgba(28, 25, 23, 0.12)',
     onSurfaceDisabled: 'rgba(28, 25, 23, 0.38)',
@@ -158,23 +200,23 @@ export const cictatTheme = {
 
     error: cictatColors.danger,
     onError: '#FFFFFF',
-    errorContainer: '#F9DEDC',
+    errorContainer: cictatColors.dangerSoft,
     onErrorContainer: '#410E0B',
 
     inverseSurface: cictatColors.carbon,
     inverseOnSurface: cictatColors.background,
-    inversePrimary: '#FFB59A',
-    shadow: cictatColors.terracotta,
+    inversePrimary: '#84D89A',
+    shadow: cictatColors.verde1,
     scrim: cictatColors.carbon,
     backdrop: 'rgba(28, 25, 23, 0.4)',
 
     elevation: {
       level0: 'transparent',
       level1: cictatColors.surface,
-      level2: '#F0EADF',
-      level3: '#EDE6D8',
-      level4: '#EBE3D4',
-      level5: '#E8DFCF',
+      level2: '#EEF4EF',
+      level3: '#E8F1EA',
+      level4: '#E2EEE5',
+      level5: '#DCEBE0',
     },
   },
   /** Tokens propios de la marca, accesibles con `useCictatTheme().cictat`. */

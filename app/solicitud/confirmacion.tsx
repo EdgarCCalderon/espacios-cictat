@@ -229,7 +229,7 @@ export default function ConfirmacionSolicitudScreen() {
           contentStyle={styles.botonDescargaContent}
           labelStyle={styles.botonDescargaLabel}
         >
-          📄 Descargar / Imprimir Formato Oficial Pre-llenado (Sin Firma)
+          Descargar / Imprimir Formato Oficial Pre-llenado
         </Button>
 
         {/* Tarjeta de Instrucciones en Ocre Suave */}
@@ -242,7 +242,8 @@ export default function ConfirmacionSolicitudScreen() {
             <Text variant="bodyMedium" style={styles.instruccionesCuerpo}>
               Espera la aprobación del encargado en la sección{' '}
               <Text style={styles.bold}>"Mis Solicitudes"</Text>. El día de tu evento, presenta este
-              formato impreso para recabar la firma física y sello en la coordinación del CICTAT — DACyTI.
+              formato impreso para recabar la firma física y sello en la coordinación del CICTAT. Recuerda
+              que el formato impreso se debe llevar al encargado ya firmado por el usuario.
             </Text>
           </View>
         </View>

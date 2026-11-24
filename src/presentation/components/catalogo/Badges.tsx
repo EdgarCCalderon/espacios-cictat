@@ -25,9 +25,9 @@ export const BadgeExclusivo: React.FC<BadgeExclusivoProps> = ({ desbloqueado = f
       accessibilityLabel="Acceso posgrado habilitado"
       accessible
     >
-      <MaterialCommunityIcons name="lock-open-variant" size={14} color={cictatColors.success} />
+      <MaterialCommunityIcons name="lock-open-variant" size={14} color={cictatColors.verde1} />
       <Text variant="labelMedium" style={styles.exclusivoAbiertoTexto}>
-        🔓 Acceso Posgrado Habilitado
+        Acceso Posgrado Habilitado
       </Text>
     </View>
   ) : (
@@ -36,26 +36,26 @@ export const BadgeExclusivo: React.FC<BadgeExclusivoProps> = ({ desbloqueado = f
       accessibilityLabel="Exclusivo para alumnos de posgrado"
       accessible
     >
-      <MaterialCommunityIcons name="lock" size={14} color={cictatColors.carbon} />
+      <MaterialCommunityIcons name="lock" size={14} color="#FFFFFF" />
       <Text variant="labelMedium" style={styles.exclusivoTexto}>
-        🔒 Exclusivo Alumnos de Posgrado
+        Exclusivo Alumnos de Posgrado
       </Text>
     </View>
   );
 
-/** Disponible (verde) / En Mantenimiento (ocre). */
+/** Disponible (verde institucional) / En Mantenimiento (naranja advertencia). */
 export const BadgeEstadoEspacio: React.FC<{ activo: boolean }> = ({ activo }) =>
   activo ? (
     <View style={[styles.estado, styles.estadoOk]}>
-      <View style={[styles.dot, { backgroundColor: cictatColors.success }]} />
-      <Text variant="labelMedium" style={[styles.estadoTexto, { color: cictatColors.success }]}>
+      <View style={[styles.dot, { backgroundColor: cictatColors.verde1 }]} />
+      <Text variant="labelMedium" style={[styles.estadoTexto, { color: cictatColors.verde1 }]}>
         Disponible
       </Text>
     </View>
   ) : (
     <View style={[styles.estado, styles.estadoMant]}>
-      <MaterialCommunityIcons name="wrench" size={13} color="#7A4E0E" />
-      <Text variant="labelMedium" style={[styles.estadoTexto, { color: '#7A4E0E' }]}>
+      <MaterialCommunityIcons name="wrench" size={13} color={cictatColors.warning} />
+      <Text variant="labelMedium" style={[styles.estadoTexto, { color: cictatColors.warning }]}>
         En Mantenimiento
       </Text>
     </View>
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs + 2,
-    backgroundColor: cictatColors.ochre,
+    backgroundColor: cictatColors.verde2,
     borderColor: cictatColors.carbon,
     borderWidth: 1.5,
     borderRadius: radius.pill,
@@ -75,11 +75,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
   },
   exclusivoAbierto: {
-    backgroundColor: '#E4F0E7',
-    borderColor: cictatColors.success,
+    backgroundColor: cictatColors.verde1Soft,
+    borderColor: cictatColors.verde1,
   },
-  exclusivoTexto: { color: cictatColors.carbon, fontWeight: '800' },
-  exclusivoAbiertoTexto: { color: cictatColors.success, fontWeight: '800' },
+  exclusivoTexto: { color: '#FFFFFF', fontWeight: '800' },
+  exclusivoAbiertoTexto: { color: cictatColors.verde1, fontWeight: '800' },
   estado: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -89,8 +89,8 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
     paddingHorizontal: spacing.sm + 2,
   },
-  estadoOk: { backgroundColor: '#E4F0E7', borderColor: cictatColors.success },
-  estadoMant: { backgroundColor: cictatColors.ochreSoft, borderColor: cictatColors.ochre },
+  estadoOk: { backgroundColor: cictatColors.verde1Soft, borderColor: cictatColors.verde1 },
+  estadoMant: { backgroundColor: cictatColors.warningSoft, borderColor: cictatColors.warning },
   estadoTexto: { fontWeight: '700' },
   dot: { width: 8, height: 8, borderRadius: radius.pill },
 });

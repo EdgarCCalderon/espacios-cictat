@@ -9,10 +9,11 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useCallback, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { ActivityIndicator, Button, IconButton, Snackbar, Text } from 'react-native-paper';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { obtenerImagenesEspacio } from '@/domain/models';
 import { formatearFechaLarga, puedeAccederAEspacio } from '@/domain/usecases';
 import { BadgeEstadoEspacio, BadgeExclusivo } from '@/presentation/components/catalogo/Badges';
 import {
@@ -294,6 +295,72 @@ export default function EspacioDetalleScreen() {
                 ) : null}
               </View>
 
+              {/* ── Galería de Fotografías de la Sala (hasta 3 imágenes JPG) ── */}
+              {(() => {
+                const fotos = obtenerImagenesEspacio(espacio);
+                const slotsPlaceholders = [
+                  { etiqueta: 'Foto 1 (.jpg)', desc: 'Vista principal y acceso al aula' },
+                  { etiqueta: 'Foto 2 (.jpg)', desc: 'Pizarrón, proyector y equipamiento' },
+                  { etiqueta: 'Foto 3 (.jpg)', desc: 'Distribución, contactos y climatización' },
+                ];
+
+                return (
+                  <View style={[styles.galeriaCard, getTerracottaShadow({ border: 'structural' })]}>
+                    <View style={styles.galeriaHeader}>
+                      <View style={styles.galeriaIconoWrap}>
+                        <MaterialCommunityIcons name="image-multiple-outline" size={20} color={cictatColors.verde1} />
+                      </View>
+                      <View style={styles.galeriaTextos}>
+                        <Text variant="titleMedium" style={styles.galeriaTitulo}>
+                          Galería Fotográfica de la Sala
+                        </Text>
+                        <Text variant="bodySmall" style={styles.galeriaSub}>
+                          {fotos.length > 0
+                            ? `${fotos.length} ${fotos.length === 1 ? 'fotografía registrada' : 'fotografías registradas'} de este espacio`
+                            : 'Espacios preparados para hasta 3 fotografías (.jpg) de la sala'}
+                        </Text>
+                      </View>
+                    </View>
+
+                    {fotos.length > 0 ? (
+                      <View style={styles.galeriaFotosGrid}>
+                        {fotos.map((url, i) => (
+                          <View key={i} style={styles.fotoCard}>
+                            <Image source={{ uri: url }} style={styles.fotoImg} resizeMode="cover" />
+                            <View style={styles.fotoBadge}>
+                              <Text variant="labelSmall" style={styles.fotoBadgeTexto}>
+                                Foto {i + 1} de {fotos.length}
+                              </Text>
+                            </View>
+                          </View>
+                        ))}
+                      </View>
+                    ) : (
+                      <View style={styles.placeholdersGrid}>
+                        {slotsPlaceholders.map((slot, i) => (
+                          <View key={i} style={styles.placeholderSlot}>
+                            <View style={styles.placeholderIconoWrap}>
+                              <MaterialCommunityIcons name="camera-outline" size={24} color="#71717A" />
+                            </View>
+                            <Text variant="labelMedium" style={styles.placeholderTitulo}>
+                              {slot.etiqueta}
+                            </Text>
+                            <Text variant="bodySmall" style={styles.placeholderDesc}>
+                              {slot.desc}
+                            </Text>
+                            <View style={styles.placeholderPill}>
+                              <Text variant="labelSmall" style={styles.placeholderPillTexto}>
+                                Espacio JPG Reservado
+                              </Text>
+                            </View>
+                          </View>
+                        ))}
+                      </View>
+                    )}
+                  </View>
+                );
+              })()}
+
               {c.errorEspacio ? <ErrorPanel error={c.errorEspacio} compacto /> : null}
 
               {!operativo ? (
@@ -546,6 +613,116 @@ const styles = StyleSheet.create({
   },
   reglamentoTitulo: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   reglamentoTexto: { color: cictatColors.textSecondary },
+
+  galeriaCard: {
+    backgroundColor: cictatColors.surfaceElevated,
+    borderRadius: radius.lg,
+    padding: spacing.lg,
+    gap: spacing.md,
+  },
+  galeriaHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm + 2,
+  },
+  galeriaIconoWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: radius.md,
+    backgroundColor: cictatColors.verde1Soft,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  galeriaTextos: { flex: 1, gap: 2 },
+  galeriaTitulo: {
+    color: cictatColors.carbon,
+    fontWeight: '800',
+  },
+  galeriaSub: {
+    color: '#71717A',
+  },
+  galeriaFotosGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+  fotoCard: {
+    flex: 1,
+    minWidth: 160,
+    height: 140,
+    borderRadius: radius.md,
+    overflow: 'hidden',
+    position: 'relative',
+    backgroundColor: '#000',
+  },
+  fotoImg: {
+    width: '100%',
+    height: '100%',
+  },
+  fotoBadge: {
+    position: 'absolute',
+    bottom: 6,
+    left: 6,
+    backgroundColor: 'rgba(28, 25, 23, 0.82)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: radius.sm,
+  },
+  fotoBadgeTexto: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  placeholdersGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+  placeholderSlot: {
+    flex: 1,
+    minWidth: 160,
+    backgroundColor: '#F8FAFC',
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderStyle: 'dashed',
+    padding: spacing.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    minHeight: 130,
+  },
+  placeholderIconoWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: radius.pill,
+    backgroundColor: '#EDF2F7',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  placeholderTitulo: {
+    color: cictatColors.carbon,
+    fontWeight: '800',
+    textAlign: 'center',
+  },
+  placeholderDesc: {
+    color: '#64748B',
+    textAlign: 'center',
+    lineHeight: 16,
+    fontSize: 11,
+  },
+  placeholderPill: {
+    backgroundColor: '#E2E8F0',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: radius.pill,
+    marginTop: 2,
+  },
+  placeholderPillTexto: {
+    color: '#475569',
+    fontWeight: '800',
+    fontSize: 10,
+  },
 
   seccion: { gap: spacing.md },
   seccionCabecera: {

@@ -13,10 +13,12 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import React, { useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Button, Text, TextInput } from 'react-native-paper';
+import { Button, Snackbar, Text, TextInput } from 'react-native-paper';
 
+import { exportarReporteEstadisticasPDF } from '@/application/services/GeneradorReportePDFService';
 import type { ISODate, ReporteOcupacionDTO } from '@/domain/models';
 import { aFechaISOLocal, formatearFolioCorto, sumarDias } from '@/domain/usecases';
+import { useAuth } from '../../context/AuthContext';
 import {
   cictatColors,
   getTerracottaShadow,
@@ -39,9 +41,12 @@ export const ReportesEstadisticasView: React.FC<ReportesEstadisticasViewProps> =
   fechaFinISO,
   onActualizarRango,
 }) => {
+  const { user, perfil } = useAuth();
   const hoyISO = useMemo(() => aFechaISOLocal(new Date()), []);
   const [inicioInput, setInicioInput] = useState(fechaInicioISO);
   const [finInput, setFinInput] = useState(fechaFinISO);
+  const [exportandoPdf, setExportandoPdf] = useState(false);
+  const [snackMensaje, setSnackMensaje] = useState<string | null>(null);
 
   const aplicarRangoRapido = (diasAtras: number, diasAdelante: number) => {
     const ini = sumarDias(hoyISO, -diasAtras);
@@ -54,6 +59,24 @@ export const ReportesEstadisticasView: React.FC<ReportesEstadisticasViewProps> =
   const aplicarManual = () => {
     if (/^\d{4}-\d{2}-\d{2}$/.test(inicioInput) && /^\d{4}-\d{2}-\d{2}$/.test(finInput)) {
       void onActualizarRango(inicioInput, finInput);
+    }
+  };
+
+  const manejarExportarPDF = async () => {
+    if (!reporte) {
+      setSnackMensaje('No hay datos disponibles para generar el informe.');
+      return;
+    }
+    setExportandoPdf(true);
+    try {
+      const nombreEncargado = perfil?.nombre_completo?.trim() || user?.email || undefined;
+      await exportarReporteEstadisticasPDF(reporte, nombreEncargado);
+      setSnackMensaje('Informe estadístico generado exitosamente.');
+    } catch (err) {
+      console.error('[Reportes] Error al generar PDF de estadísticas:', err);
+      setSnackMensaje('No se pudo generar el documento PDF. Intenta nuevamente.');
+    } finally {
+      setExportandoPdf(false);
     }
   };
 
@@ -126,16 +149,30 @@ export const ReportesEstadisticasView: React.FC<ReportesEstadisticasViewProps> =
             onChangeText={setFinInput}
             style={styles.fechaInput}
           />
-          <Button
-            mode="contained"
-            icon="chart-box-outline"
-            onPress={aplicarManual}
-            buttonColor={cictatColors.terracotta}
-            textColor="#FFFFFF"
-            labelStyle={styles.bold}
-          >
-            Consultar
-          </Button>
+          <View style={styles.botonesAccionRow}>
+            <Button
+              mode="contained"
+              icon="chart-box-outline"
+              onPress={aplicarManual}
+              buttonColor={cictatColors.carbon}
+              textColor="#FFFFFF"
+              labelStyle={styles.bold}
+            >
+              Consultar
+            </Button>
+            <Button
+              mode="contained"
+              icon="file-pdf-box"
+              onPress={manejarExportarPDF}
+              loading={exportandoPdf}
+              disabled={exportandoPdf || !reporte}
+              buttonColor={cictatColors.verde1}
+              textColor="#FFFFFF"
+              labelStyle={styles.bold}
+            >
+              {exportandoPdf ? 'Generando PDF…' : 'Generar Reporte PDF'}
+            </Button>
+          </View>
         </View>
       </View>
 
@@ -155,7 +192,7 @@ export const ReportesEstadisticasView: React.FC<ReportesEstadisticasViewProps> =
           subtitulo="Con bloqueo +1h limpieza"
           icono="check-decagram"
           colorFondo="#E4F0E7"
-          colorIcono={cictatColors.success}
+          colorIcono={cictatColors.verde1}
         />
         <TarjetaKpi
           titulo="Pendientes"
@@ -170,15 +207,15 @@ export const ReportesEstadisticasView: React.FC<ReportesEstadisticasViewProps> =
           valor={kpis.rechazadasPorColisionAutomatica}
           subtitulo="Trigger SQL automático"
           icono="lightning-bolt-circle"
-          colorFondo={cictatColors.terracottaSoft}
-          colorIcono={cictatColors.terracotta}
+          colorFondo={cictatColors.warningSoft}
+          colorIcono={cictatColors.warning}
         />
         <TarjetaKpi
           titulo="Rechazo Manual"
           valor={kpis.rechazadasManual}
           subtitulo="Por dictamen del encargado"
           icono="close-octagon-outline"
-          colorFondo="#FDF2F0"
+          colorFondo={cictatColors.dangerSoft}
           colorIcono={cictatColors.danger}
         />
         <TarjetaKpi
@@ -230,8 +267,8 @@ export const ReportesEstadisticasView: React.FC<ReportesEstadisticasViewProps> =
                       width: `${Math.max(item.porcentajeRelativo, item.totalSolicitudesEspacio > 0 ? 8 : 0)}%`,
                       backgroundColor:
                         item.tipoEspacio === 'cubiculo_estudio'
-                          ? cictatColors.ochre
-                          : cictatColors.terracotta,
+                          ? cictatColors.verde2
+                          : cictatColors.verde1,
                     },
                   ]}
                 />
@@ -269,9 +306,9 @@ export const ReportesEstadisticasView: React.FC<ReportesEstadisticasViewProps> =
                       width: `${Math.max(d.porcentaje, d.conteo > 0 ? 6 : 0)}%`,
                       backgroundColor:
                         d.rol === 'estudiante_posgrado'
-                          ? cictatColors.ochre
+                          ? cictatColors.verde2
                           : d.rol === 'doctor_posgrado'
-                            ? cictatColors.terracotta
+                            ? cictatColors.verde1
                             : cictatColors.carbon,
                     },
                   ]}
@@ -332,6 +369,18 @@ export const ReportesEstadisticasView: React.FC<ReportesEstadisticasViewProps> =
           </View>
         )}
       </View>
+
+      <Snackbar
+        visible={!!snackMensaje}
+        onDismiss={() => setSnackMensaje(null)}
+        duration={3500}
+        action={{
+          label: 'OK',
+          onPress: () => setSnackMensaje(null),
+        }}
+      >
+        {snackMensaje}
+      </Snackbar>
     </View>
   );
 };
@@ -397,6 +446,12 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 160,
     backgroundColor: cictatColors.surfaceElevated,
+  },
+  botonesAccionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    flexWrap: 'wrap',
   },
 
   kpisGrid: {

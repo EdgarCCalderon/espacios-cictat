@@ -48,7 +48,7 @@ const TarjetaPerfil: React.FC<TarjetaPerfilProps> = ({
         : styles.badgeSurface;
 
   const badgeTextStyle =
-    acento === 'terracotta' ? styles.badgeTextoBlanco : styles.badgeTextoCarbon;
+    acento === 'terracotta' || acento === 'ochre' ? styles.badgeTextoBlanco : styles.badgeTextoCarbon;
 
   const iconBg =
     acento === 'terracotta'
@@ -142,8 +142,8 @@ export default function SelectorPerfilScreen() {
       <View style={styles.lista}>
         <TarjetaPerfil
           titulo="Estudiante de Posgrado"
-          descripcion="Comunidad estudiantil de posgrado DACyTI con matrícula institucional (@alumno.ujat.mx)."
-          badge="Desbloquea Salas 1-6 y Cubículos 7-9 🔒"
+          descripcion="Comunidad estudiantil de posgrado con matrícula institucional (@alumno.ujat.mx)."
+          badge="Desbloquea Salas 1-6 y Cubículos 7-9"
           icono="school"
           acento="ochre"
           onPress={() =>

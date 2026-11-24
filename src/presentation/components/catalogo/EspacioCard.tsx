@@ -3,7 +3,7 @@
  */
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import React from 'react';
-import { Image, Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
 
 import type { Espacio } from '@/domain/models';
@@ -38,10 +38,6 @@ export const EspacioCard: React.FC<EspacioCardProps> = ({ espacio, bloqueadoPara
         !activo && styles.inactiva,
       ]}
     >
-      {espacio.imagen_url ? (
-        <Image source={{ uri: espacio.imagen_url }} style={styles.imagen} resizeMode="cover" />
-      ) : null}
-
       <View style={styles.cuerpo}>
         <View style={styles.filaSuperior}>
           <View style={styles.codigo}>

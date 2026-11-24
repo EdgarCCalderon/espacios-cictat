@@ -407,7 +407,7 @@ export default function MisSolicitudesScreen() {
                       <MaterialCommunityIcons
                         name="calendar-month"
                         size={18}
-                        color={cictatColors.terracotta}
+                        color={cictatColors.verde1}
                       />
                       <Text variant="bodyMedium" style={styles.detalleFilaTexto}>
                         <Text style={styles.bold}>{formatearFechaLarga(sol.fecha_evento)}</Text> ({sol.fecha_evento})
@@ -418,7 +418,7 @@ export default function MisSolicitudesScreen() {
                       <MaterialCommunityIcons
                         name="clock-time-four-outline"
                         size={18}
-                        color={cictatColors.ochre}
+                        color={cictatColors.verde2}
                       />
                       <View style={styles.horarioBloque}>
                         <Text variant="bodyMedium" style={styles.detalleFilaTexto}>
@@ -457,7 +457,7 @@ export default function MisSolicitudesScreen() {
                         size={20}
                         color={
                           esRechazoColision
-                            ? cictatColors.ochre
+                            ? cictatColors.warning
                             : sol.estado === 'cancelada'
                               ? cictatColors.carbon
                               : cictatColors.danger
@@ -488,15 +488,24 @@ export default function MisSolicitudesScreen() {
                       {/* Botón Descargar Formato PDF Pre-llenado */}
                       <Button
                         mode="outlined"
-                        icon="file-pdf-box"
+                        icon={({ size }) => (
+                          <MaterialCommunityIcons
+                            name="file-pdf-box"
+                            size={size}
+                            color={sol.estado === 'rechazada' ? cictatColors.warning : cictatColors.carbon}
+                          />
+                        )}
                         loading={esDescargando}
                         disabled={esDescargando}
                         onPress={() => void manejarDescargarPDF(sol)}
-                        textColor={cictatColors.carbon}
-                        style={styles.botonPdf}
+                        textColor={sol.estado === 'rechazada' ? cictatColors.warning : cictatColors.carbon}
+                        style={[
+                          styles.botonPdf,
+                          sol.estado === 'rechazada' && styles.botonPdfRechazada,
+                        ]}
                         labelStyle={styles.botonPdfLabel}
                       >
-                        📄 Descargar Formato PDF
+                        Descargar Formato PDF
                       </Button>
 
                       {/* Botón Cancelar Solicitud */}
@@ -702,8 +711,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: cictatColors.carbon,
   },
-  badgePendiente: { backgroundColor: cictatColors.ochre },
-  badgeAprobada: { backgroundColor: cictatColors.success },
+  badgePendiente: { backgroundColor: cictatColors.warning },
+  badgeAprobada: { backgroundColor: cictatColors.verde1 },
   badgeRechazada: { backgroundColor: cictatColors.danger },
   badgeCancelada: { backgroundColor: '#57534E' },
   badgeEstadoLabel: {
@@ -731,7 +740,7 @@ const styles = StyleSheet.create({
   },
   horarioBloque: { flex: 1, gap: 1 },
   limpiezaNota: {
-    color: cictatColors.terracotta,
+    color: cictatColors.verde1,
     fontWeight: '600',
   },
   temaTexto: {
@@ -752,8 +761,8 @@ const styles = StyleSheet.create({
     borderColor: cictatColors.danger,
   },
   motivoColisionCaja: {
-    backgroundColor: cictatColors.ochreSoft,
-    borderColor: cictatColors.ochre,
+    backgroundColor: cictatColors.warningSoft,
+    borderColor: cictatColors.warning,
   },
   motivoCanceladaCaja: {
     backgroundColor: '#E7E5E4',
@@ -791,10 +800,14 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   botonPdf: {
-    borderColor: cictatColors.carbon,
+    borderColor: '#D4D4D8',
     borderWidth: 1,
     borderRadius: radius.pill,
     backgroundColor: cictatColors.surfaceElevated,
+  },
+  botonPdfRechazada: {
+    borderColor: cictatColors.warning,
+    backgroundColor: cictatColors.warningSoft,
   },
   botonPdfLabel: {
     fontWeight: '800',

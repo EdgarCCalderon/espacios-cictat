@@ -1,7 +1,7 @@
 /**
  * app/solicitud/nueva.tsx — Formulario de Solicitud de Reserva y Carga Documental (U-01)
  *
- * Flujo de Solicitante CICTAT (DACyTI - UJAT):
+ * Flujo de Solicitante CICTAT (UJAT):
  * - Resumen del espacio con especificación de equipamiento (Salas 1-6 o Cubículos 7-9).
  * - Selección y validación en tiempo real de fecha y horario (08:00 a 15:00 hrs + 1h limpieza).
  * - Captura del tema/descripción del evento.
@@ -195,11 +195,7 @@ export default function NuevaSolicitudScreen() {
       return;
     }
     if (!archivo) {
-      setSnackError(
-        perfil.rol === 'publico_general'
-          ? 'Es obligatorio adjuntar tu Identificación Oficial (INE).'
-          : 'Es obligatorio adjuntar tu Credencial de Posgrado UJAT.',
-      );
+      setSnackError('Es obligatorio adjuntar tu credencial vigente (credencial de alumno, doctor, o de persona externa).');
       return;
     }
     if (validacion && !validacion.ok) {
@@ -429,8 +425,8 @@ export default function NuevaSolicitudScreen() {
                   />
                   <Text variant="bodySmall" style={styles.equipamientoTexto}>
                     {esSala
-                      ? '⚡ Equipamiento Incluido: Incluye acceso y préstamo intrínseco de Proyector, Laptop y Extensión eléctrica para tu evento.'
-                      : '🔒 Cubículo de estudio exclusivo para Posgrado (5 personas): Mesa colaborativa, contactos eléctricos y climatización.'}
+                      ? 'Equipamiento Incluido: Acceso y préstamo de Proyector, Laptop y Extensión eléctrica para tu evento.'
+                      : 'Cubículo de estudio exclusivo para Posgrado (5 personas): Mesa colaborativa, contactos eléctricos y climatización.'}
                   </Text>
                 </View>
               </View>
@@ -587,18 +583,14 @@ export default function NuevaSolicitudScreen() {
           {/* 5. Carga de Identificación Oficial (Obligatorio) */}
           <View style={[styles.card, getTerracottaShadow({ border: 'structural' })]}>
             <View style={styles.cardHeader}>
-              <MaterialCommunityIcons name="card-account-details" size={22} color={cictatColors.terracotta} />
+              <MaterialCommunityIcons name="card-account-details" size={22} color={cictatColors.verde1} />
               <Text variant="titleMedium" style={styles.cardTitulo}>
-                {perfil?.rol === 'publico_general'
-                  ? 'Identificación Oficial INE (Obligatorio)'
-                  : 'Credencial de Posgrado UJAT (Obligatorio)'}
+                Credencial vigente, obligatorio
               </Text>
             </View>
 
             <Text variant="bodyMedium" style={styles.idSubtitulo}>
-              {perfil?.rol === 'publico_general'
-                ? 'Por disposición universitaria, el público externo debe adjuntar una copia legible de su INE en formato PDF o Imagen.'
-                : 'Adjunta tu credencial vigente de Alumno o Doctor de Posgrado UJAT (PDF o Imagen JPG/PNG).'}
+              Credencial de alumno, doctor, o de persona externa (INE). Adjunta el archivo en PDF o Imagen (JPG/PNG).
             </Text>
 
             {archivo ? (
@@ -634,7 +626,7 @@ export default function NuevaSolicitudScreen() {
               >
                 {perfil?.rol === 'publico_general'
                   ? 'Subir Identificación Oficial INE (PDF o Imagen)'
-                  : 'Subir Credencial de Posgrado UJAT (PDF o Imagen)'}
+                  : 'Subir Credencial (PDF o Imagen)'}
               </Button>
             )}
           </View>
@@ -682,7 +674,7 @@ export default function NuevaSolicitudScreen() {
           </Button>
 
           <Text variant="bodySmall" style={styles.pieTexto}>
-            CICTAT · División Académica de Ciencias y Tecnologías de la Información · DACyTI - UJAT
+            CICTAT · Centro de Investigación de Ciencia y Tecnología Aplicada de Tabasco · UJAT
           </Text>
         </ScrollView>
       </KeyboardAvoidingView>

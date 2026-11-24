@@ -79,7 +79,7 @@ export const AuthScreenContainer: React.FC<AuthScreenContainerProps> = ({
             <View style={styles.institucionalTag}>
               <MaterialCommunityIcons name="shield-check-outline" size={15} color={cictatColors.ochre} />
               <Text variant="labelSmall" style={styles.institucionalTexto}>
-                DACyTI · UJAT
+                CICTAT · UJAT
               </Text>
             </View>
           </View>
