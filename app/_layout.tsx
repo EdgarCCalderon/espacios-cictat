@@ -4,6 +4,7 @@
  */
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Stack } from 'expo-router';
+import Head from 'expo-router/head';
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import { PaperProvider } from 'react-native-paper';
@@ -15,6 +16,10 @@ import { cictatColors, cictatTheme } from '@/presentation/theme/cictatTheme';
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
+      <Head>
+        <title>Espacios CICTAT</title>
+        <link rel="icon" type="image/png" href="/assets/favicon.png" />
+      </Head>
       <PaperProvider
         theme={cictatTheme}
         settings={{ icon: (props) => <MaterialCommunityIcons {...props} /> }}

@@ -10,12 +10,12 @@
     "backgroundColor": "#FAF7F2",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "mx.ujat.dacyti.espacioscictat"
+      "bundleIdentifier": "mx.ujat.cictat.espacioscictat"
     },
     "android": {
-      "package": "mx.ujat.dacyti.espacioscictat",
+      "package": "mx.ujat.cictat.espacioscictat",
       "adaptiveIcon": {
-        "backgroundColor": "#FAF7F2",
+        "backgroundColor": "#1C8443",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
