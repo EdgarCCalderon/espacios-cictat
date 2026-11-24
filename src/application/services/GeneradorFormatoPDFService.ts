@@ -20,6 +20,8 @@ import { formatearFechaLarga } from '@/domain/usecases/calendario';
 import { supabase } from '@/infrastructure/supabase/supabaseClient';
 import { TABLAS } from '@/infrastructure/supabase/tables';
 
+import { LOGO_SIPV_DATA_URI, LOGO_UJAT_DATA_URI } from './logosInstitucionales';
+
 // Nombres de buckets institucionales
 const BUCKET_FORMATOS_PDF = 'formatos_pdf';
 const BUCKET_FALLBACK = 'documentos-solicitud';
@@ -117,26 +119,69 @@ export function generarHTMLFormatoCICTAT(
     .header-institucional {
       text-align: center;
       border-bottom: 2.5px solid #1C1917;
-      padding-bottom: 10px;
-      margin-bottom: 14px;
+      padding-bottom: 9px;
+      margin-bottom: 12px;
+    }
+    .header-superior {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      width: 100%;
+      margin-bottom: 7px;
+    }
+    .header-logo-col {
+      flex: 0 0 27.5%;
+      max-width: 210px;
+      display: flex;
+      align-items: center;
+    }
+    .header-logo-col.izq {
+      justify-content: flex-start;
+    }
+    .header-logo-col.der {
+      justify-content: flex-end;
+    }
+    .header-logo-ujat {
+      width: 100%;
+      max-width: 168px;
+      height: auto;
+      display: block;
+      object-fit: contain;
+    }
+    .header-logo-sipv {
+      width: 100%;
+      max-width: 205px;
+      height: auto;
+      display: block;
+      object-fit: contain;
+    }
+    .header-centro {
+      flex: 1;
+      min-width: 0;
+      text-align: center;
+      padding: 0 4px;
     }
     .header-institucional h1 {
-      font-size: 13pt;
-      margin: 0 0 2px 0;
+      font-size: 10.8pt;
+      margin: 0 0 3px 0;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.25px;
+      line-height: 1.2;
       color: #1C1917;
       font-weight: 800;
     }
     .header-institucional h2 {
-      font-size: 10.5pt;
+      font-size: 9pt;
       margin: 0 0 2px 0;
+      line-height: 1.25;
       font-weight: 600;
       color: #41AD49;
     }
     .header-institucional h3 {
-      font-size: 9.5pt;
-      margin: 0 0 8px 0;
+      font-size: 8.5pt;
+      margin: 0;
+      line-height: 1.25;
       font-weight: 500;
       color: #57534E;
     }
@@ -145,12 +190,12 @@ export function generarHTMLFormatoCICTAT(
       background-color: #1C8443;
       color: #FFFFFF;
       padding: 5px 18px;
-      font-size: 11pt;
+      font-size: 10.5pt;
       font-weight: 700;
-      letter-spacing: 1px;
+      letter-spacing: 0.9px;
       border-radius: 4px;
       text-transform: uppercase;
-      margin-top: 4px;
+      margin-top: 2px;
     }
     .meta-banda {
       display: flex;
@@ -298,9 +343,19 @@ export function generarHTMLFormatoCICTAT(
 
   <!-- Encabezado Institucional -->
   <div class="header-institucional">
-    <h1>UNIVERSIDAD JUÁREZ AUTÓNOMA DE TABASCO</h1>
-    <h2>Centro de Investigación de Ciencia y Tecnología Aplicada de Tabasco (CICTAT)</h2>
-    <h3>Coordinación de Espacios y Laboratorios</h3>
+    <div class="header-superior">
+      <div class="header-logo-col izq">
+        <img class="header-logo-ujat" src="${LOGO_UJAT_DATA_URI}" alt="Universidad Juárez Autónoma de Tabasco" />
+      </div>
+      <div class="header-centro">
+        <h1>UNIVERSIDAD JUÁREZ AUTÓNOMA DE TABASCO</h1>
+        <h2>Centro de Investigación de Ciencia y Tecnología Aplicada de Tabasco (CICTAT)</h2>
+        <h3>Coordinación de Espacios y Laboratorios</h3>
+      </div>
+      <div class="header-logo-col der">
+        <img class="header-logo-sipv" src="${LOGO_SIPV_DATA_URI}" alt="Secretaría de Investigación, Posgrado y Vinculación" />
+      </div>
+    </div>
     <div class="titulo-documento">FORMATO OFICIAL DE SOLICITUD DE RESERVA DE ESPACIO</div>
   </div>
 

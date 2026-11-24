@@ -12,6 +12,8 @@ import { Platform } from 'react-native';
 import type { ReporteOcupacionDTO } from '@/domain/models';
 import { formatearFolioCorto } from '@/domain/usecases';
 
+import { LOGO_SIPV_DATA_URI, LOGO_UJAT_DATA_URI } from './logosInstitucionales';
+
 /**
  * Formatea una fecha YYYY-MM-DD en formato legible formal (ej. 15 de marzo de 2026).
  */
@@ -170,6 +172,8 @@ export function generarHTMLReporteEstadisticas(
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
     }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -226,40 +230,83 @@ export function generarHTMLReporteEstadisticas(
     /* Encabezado Formal */
     .header-institucional {
       border-bottom: 2.5px solid #1C8443;
-      padding-bottom: 12px;
-      margin-bottom: 16px;
+      padding-bottom: 10px;
+      margin-bottom: 14px;
+      text-align: center;
+    }
+    .header-superior {
       display: flex;
+      align-items: center;
       justify-content: space-between;
-      align-items: flex-start;
+      gap: 8px;
+      width: 100%;
+      margin-bottom: 8px;
+    }
+    .header-logo-col {
+      flex: 0 0 27.5%;
+      max-width: 210px;
+      display: flex;
+      align-items: center;
+    }
+    .header-logo-col.izq {
+      justify-content: flex-start;
+    }
+    .header-logo-col.der {
+      justify-content: flex-end;
+    }
+    .header-logo-ujat {
+      width: 100%;
+      max-width: 168px;
+      height: auto;
+      display: block;
+      object-fit: contain;
+    }
+    .header-logo-sipv {
+      width: 100%;
+      max-width: 205px;
+      height: auto;
+      display: block;
+      object-fit: contain;
+    }
+    .header-textos {
+      flex: 1;
+      min-width: 0;
+      text-align: center;
+      padding: 0 4px;
     }
     .header-textos h1 {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 800;
       color: #1C8443;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.3px;
+      line-height: 1.2;
       text-transform: uppercase;
     }
     .header-textos h2 {
-      font-size: 13px;
+      font-size: 11px;
       font-weight: 700;
       color: #27272A;
+      line-height: 1.25;
       margin-top: 2px;
     }
     .header-textos h3 {
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 600;
       color: #71717A;
+      line-height: 1.25;
       margin-top: 2px;
     }
     .badge-reporte {
+      display: inline-block;
       background: #E4F0E7;
       border: 1px solid #1C8443;
       color: #1C8443;
       font-size: 11px;
       font-weight: 800;
-      padding: 6px 12px;
+      letter-spacing: 0.4px;
+      padding: 5px 16px;
       border-radius: 6px;
-      text-align: right;
+      text-align: center;
     }
 
     /* Banda informativa */
@@ -453,14 +500,21 @@ export function generarHTMLReporteEstadisticas(
 
   <!-- Encabezado Formal Institucional -->
   <div class="header-institucional">
-    <div class="header-textos">
-      <h1>Universidad Juárez Autónoma de Tabasco</h1>
-      <h2>Centro de Investigación de Ciencia y Tecnología Aplicada de Tabasco (CICTAT)</h2>
-      <h3>Sistema Central de Gestión y Asignación de Espacios</h3>
+    <div class="header-superior">
+      <div class="header-logo-col izq">
+        <img class="header-logo-ujat" src="${LOGO_UJAT_DATA_URI}" alt="Universidad Juárez Autónoma de Tabasco" />
+      </div>
+      <div class="header-textos">
+        <h1>Universidad Juárez Autónoma de Tabasco</h1>
+        <h2>Centro de Investigación de Ciencia y Tecnología Aplicada de Tabasco (CICTAT)</h2>
+        <h3>Sistema Central de Gestión y Asignación de Espacios</h3>
+      </div>
+      <div class="header-logo-col der">
+        <img class="header-logo-sipv" src="${LOGO_SIPV_DATA_URI}" alt="Secretaría de Investigación, Posgrado y Vinculación" />
+      </div>
     </div>
     <div class="badge-reporte">
-      INFORME EJECUTIVO DE OCUPACIÓN
-      <div style="font-size: 10px; font-weight: 500; color: #52525B; margin-top: 2px;">Gestión de Espacios</div>
+      INFORME EJECUTIVO DE OCUPACIÓN · GESTIÓN DE ESPACIOS
     </div>
   </div>
 
